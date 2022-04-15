@@ -21,13 +21,12 @@
       "require": {      
         "damconsultants/bynder": "dev-master"
       },
-      "repositories": [
+       "repositories": [
         {
-          "packagist": false,
-          "type": "vcs",
-          "url": "https://github.com/damconsultants/bynder.git"
+            "type": "composer",
+            "url": "https://repo.magento.com/"
         }
-      ],
-      "minimum-stability": "dev"
+    ],
+      "minimum-stability": "dev-master"
     }
 }
