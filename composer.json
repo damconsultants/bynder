@@ -21,6 +21,16 @@
       "require": {      
         "damconsultants/bynder": "dev-master"
       },
+      "repositories": [
+        {
+          "type": "vcs",
+          "url":  "git@github.com:damconsultants/bynder.git"
+        },
+        {
+          "type": "vcs",
+          "url":  "git@github.com:damconsultants/bynder.git"
+        }
+      ],
       "minimum-stability": "dev"
-   }
+    }
 }
