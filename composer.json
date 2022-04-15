@@ -23,12 +23,9 @@
       },
       "repositories": [
         {
+          "packagist": false,
           "type": "vcs",
-          "url":  "git@github.com:damconsultants/bynder.git"
-        },
-        {
-          "type": "vcs",
-          "url":  "git@github.com:damconsultants/bynder.git"
+          "url": "https://github.com/damconsultants/bynder.git"
         }
       ],
       "minimum-stability": "dev"
