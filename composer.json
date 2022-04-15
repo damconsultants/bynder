@@ -17,15 +17,7 @@
             "registration.php"
         ]
     },
-      "require": {      
-        "damconsultants/bynder": "dev-master"
-      },
-       "repositories": [
-        {
-            "type": "composer",
-            "url": "https://repo.magento.com/"
-        }
-    ],
-    "minimum-stability": "dev"
+    "require": {},
+    "minimum-stability": "stable"
     
 }
