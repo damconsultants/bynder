@@ -17,7 +17,6 @@
             "registration.php"
         ]
     },
-    {
       "require": {      
         "damconsultants/bynder": "dev-master"
       },
@@ -27,6 +26,6 @@
             "url": "https://repo.magento.com/"
         }
     ],
-      "minimum-stability": "dev-master"
-    }
+    "minimum-stability": "dev-master"
+    
 }
