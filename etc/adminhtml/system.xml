@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="bynder_tab" translate="label" sortOrder="0">
+            <label> Bynder Configuration </label>
+        </tab>
+        <section id="bynderconfig" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Configuration</label>
+            <tab>bynder_tab</tab>
+            <resource>DamConsultants_Bynder::config</resource>
+            <group id="bynder_credential" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Bynder Credential</label>
+                <field id="bynderdomain" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Bynder Domain</label>
+                </field>
+                <field id="clientid" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Client Id</label>
+                </field>
+                <field id="secretkey" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Secret Key</label>
+                </field>
+                <field id="permanent_token" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Permanent Token</label>
+                </field>
+				<field id="licenses_key" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>License Key</label>
+                </field>
+                <field id="bt_id" translate="label" type="button" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_model>DamConsultants\Bynder\Block\System\Config\Button</frontend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

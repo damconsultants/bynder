@@ -1,0 +1,20 @@
+{
+    "name": "damconsultants/bynder",
+    "description": "DamConsultants Bynder for Magento 2",
+    "type": "magento2-module",
+    "authors": [
+        {
+            "name": "DamConsultants",
+            "email": "sean@thedamconsultants.com"
+        }
+    ],
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {
+            "DamConsultants\\Bynder\\": ""
+        },
+        "files": [
+            "registration.php"
+        ]
+    }
+}

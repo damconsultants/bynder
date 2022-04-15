@@ -1,0 +1,663 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+
+
+/** @var $block \Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Gallery\Content */
+
+$elementNameEscaped = $block->escapeHtmlAttr($block->getElement()->getName()) . '[images]';
+$formNameEscaped = $block->escapeHtmlAttr($block->getFormName());
+
+unset($_COOKIE['fcookie']);
+setcookie('fcookie', null, -1, '/');
+
+$entity_id = $this->getRequest()->getParam('id');
+if(isset($entity_id) && !empty($entity_id)) {
+	$entity_id = $this->getRequest()->getParam('id');
+}
+else {
+	$entity_id = 0;
+}
+
+$helper = $this->helper('DamConsultants\Bynder\Helper\Data');
+$check_bynder = $helper->check_bynder();
+$array = json_decode($check_bynder);
+?>
+
+<div class="row">
+    <div class="add-video-button-container">
+        <button id="add_video_button"
+                title="<?= $block->escapeHtmlAttr(__('Add Video')) ?>"
+                data-role="add-video-button"
+                type="button"
+                class="action-secondary"
+                data-ui-id="widget-button-1">
+            <span><?= $block->escapeHtml(__('Add Video')) ?></span>
+        </button>
+        <?php if($array->status == 1){ ?>
+            <button type="button" name="update_bynder_data" id="update_bynder_data" data-pid="<?=$entity_id?>" >Update bynder asset</button>
+            <button type="button" name="external_image" id="external_image" >Bynder Image</button>
+        <?php } ?>
+		
+    </div>
+    <input type="hidden" name="image_url" id="image_url" />
+</div>
+
+
+<?php
+/** @var $block \Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Gallery\Content */
+$element = $block->getElement();
+$elementToggleCode = $element->getToggleCode() ? $element->getToggleCode() : 'toggleValueElements(this, this.parentNode.parentNode.parentNode)';
+?>
+<div id="<?= /* @noEscape */ $block->getHtmlId() ?>"
+     class="gallery"
+     data-mage-init='{"openVideoModal":{}}'
+     data-parent-component="<?= $block->escapeHtmlAttr($block->getData('config/parentComponent')) ?>"
+     data-images="<?= $block->escapeHtmlAttr($block->getImagesJson()) ?>"
+     data-types='<?= /* @noEscape */ $this->helper(Magento\Framework\Json\Helper\Data::class)->jsonEncode($block->getImageTypes()) ?>'
+>
+    <?php if (!$block->getElement()->getReadonly()) : ?>
+        <div class="image image-placeholder">
+            <?= $block->getUploaderHtml(); ?>
+            <div class="product-image-wrapper">
+                <p class="image-placeholder-text">
+                    <?= $block->escapeHtml(__('Browse to find or drag image here')); ?>
+                </p>
+            </div>
+        </div>
+        <?= $block->getChildHtml('additional_buttons') ?>
+    <?php endif; ?>
+    <?php foreach ($block->getImageTypes() as $typeData) : ?>
+        <input name="<?= $block->escapeHtmlAttr($typeData['name']) ?>"
+               data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"
+               class="image-<?= $block->escapeHtmlAttr($typeData['code']) ?>"
+               type="hidden"
+               value="<?= $block->escapeHtmlAttr($typeData['value']) ?>"/>
+    <?php endforeach; ?>
+    <script id="<?= /* @noEscape */ $block->getHtmlId() ?>-template" data-template="image" type="text/x-magento-template">
+
+        <div class="image item <% if (data.disabled == 1) { %>hidden-for-front<% } %>  <% if (data.video_url) { %>video-item<% } %>"
+             data-role="image">
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][position]"
+                   value="<%- data.position %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"
+                   class="position"/>
+            <% if (data.media_type !== 'external-video') {%>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][media_type]"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"
+                   value="image"/>
+            <% } else { %>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][media_type]"
+                   value="<%- data.media_type %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <% } %>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][video_provider]"
+                   value="<%- data.video_provider %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][file]"
+                   value="<%- data.file %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][value_id]"
+                   value="<%- data.value_id %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][label]"
+                   value="<%- data.label %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][disabled]"
+                   value="<%- data.disabled %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][removed]"
+                   value="" class="is-removed"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][video_url]"
+                   value="<%- data.video_url %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][video_title]"
+                   value="<%- data.video_title %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][video_description]"
+                   value="<%- data.video_description %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][video_metadata]"
+                   value="<%- data.video_metadata %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+            <input type="hidden"
+                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][role]"
+                   value="<%- data.video_description %>"
+                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"/>
+
+            <div class="product-image-wrapper">
+                <img class="product-image"
+                     data-role="image-element"
+                     src="<%- data.url %>"
+                     alt="<%- data.label %>"/>
+
+                <div class="actions">
+                    <div class="tooltip">
+                        <span class="delete-tooltiptext">
+                            <?= $block->escapeHtml(__('Delete image in all store views')); ?>
+                        </span>
+                        <button type="button"
+                                class="action-remove"
+                                data-role="delete-button"
+                                title="<% if (data.media_type == 'external-video') {%>
+                                <?= $block->escapeHtmlAttr(__('Delete video')); ?>
+                            <%} else {%>
+                                <?= $block->escapeHtmlAttr(__('Delete image')); ?>
+                            <%}%>">
+                        <span>
+                            <% if (data.media_type == 'external-video') { %>
+                            <?= $block->escapeHtml(__('Delete video')); ?>
+                            <% } else {%>
+                            <?= $block->escapeHtml(__('Delete image')); ?>
+                            <%} %>
+                        </span>
+                        </button>
+                    </div>
+                    <div class="draggable-handle"></div>
+                </div>
+                <div class="image-fade"><span><?= $block->escapeHtml(__('Hidden')); ?></span></div>
+            </div>
+
+            <div class="item-description">
+                <% if (data.media_type !== 'external-video') {%>
+                <div class="item-title" data-role="img-title"><%- data.label %></div>
+                <div class="item-size">
+                    <span data-role="image-dimens"></span>, <span data-role="image-size"><%- data.sizeLabel %></span>
+                </div>
+                <% } else { %>
+                <div class="item-title" data-role="img-title"><%- data.video_title %></div>
+                <% } %>
+            </div>
+
+            <ul class="item-roles" data-role="roles-labels">
+                <?php foreach ($block->getImageTypes() as $typeData) : ?>
+                    <li data-role-code="<?= $block->escapeHtmlAttr($typeData['code']) ?>" class="item-role item-role-<?= $block->escapeHtmlAttr($typeData['code']) ?>">
+                        <?= $block->escapeHtml($typeData['label']) ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </script>
+
+    <script data-role="img-dialog-container-tmpl" type="text/x-magento-template">
+        <div class="image-panel" data-role="dialog">
+        </div>
+    </script>
+
+    <script data-role="img-dialog-tmpl" type="text/x-magento-template">
+        <div class="image-panel-preview">
+            <img src="<%- data.url %>" alt="<%- data.label %>" />
+        </div>
+        <div class="image-panel-controls">
+            <strong class="image-name"><%- data.label %></strong>
+
+            <fieldset class="admin__fieldset fieldset-image-panel">
+                <div class="admin__field field-image-description">
+                    <label class="admin__field-label" for="image-description">
+                        <span><?= $block->escapeHtml(__('Alt Text')) ?></span>
+                    </label>
+
+                    <div class="admin__field-control">
+                            <textarea data-role="image-description"
+                                      rows="3"
+                                      class="admin__control-textarea"
+                                      name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][label]"><%- data.label %></textarea>
+                    </div>
+                </div>
+
+                <div class="admin__field field-image-role">
+                    <label class="admin__field-label">
+                            <span><?= $block->escapeHtml(__('Role')); ?></span>
+                    </label>
+                    <div class="admin__field-control">
+                        <ul class="multiselect-alt">
+                            <?php
+                            foreach ($block->getMediaAttributes() as $attribute) :
+                                ?>
+                                <li class="item">
+                                    <label>
+                                        <input class="image-type"
+                                               data-role="type-selector"
+                                               data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"
+                                               type="checkbox"
+                                               value="<?= $block->escapeHtmlAttr($attribute->getAttributeCode()) ?>"
+                                        />
+                                        <?= $block->escapeHtml($attribute->getFrontendLabel()) ?>
+                                    </label>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="admin__field admin__field-inline field-image-size" data-role="size">
+                    <label class="admin__field-label">
+                        <span><?= $block->escapeHtml(__('Image Size')) ?></span>
+                    </label>
+                    <div class="admin__field-value" data-message="<?= $block->escapeHtmlAttr(__('{size}')) ?>"></div>
+                </div>
+
+                <div class="admin__field admin__field-inline field-image-resolution" data-role="resolution">
+                    <label class="admin__field-label">
+                        <span><?= $block->escapeHtml(__('Image Resolution')) ?></span>
+                    </label>
+                    <div class="admin__field-value" data-message="<?= $block->escapeHtmlAttr(__('{width}^{height} px')) ?>"></div>
+                </div>
+
+                <div class="admin__field field-image-hide">
+                    <div class="admin__field-control">
+                        <div class="admin__field admin__field-option">
+                            <input type="checkbox"
+                                   id="hide-from-product-page"
+                                   data-role="visibility-trigger"
+                                   data-form-part="<?= /* @noEscape */ $formNameEscaped ?>"
+                                   value="1"
+                                   class="admin__control-checkbox"
+                                   name="<?= /* @noEscape */ $elementNameEscaped ?>[<%- data.file_id %>][disabled]"
+                            <% if (data.disabled == 1) { %>checked="checked"<% } %> />
+
+                            <label for="hide-from-product-page" class="admin__field-label">
+                                <?= $block->escapeHtml(__('Hide from Product Page')); ?>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </script>
+    <div id="<?= /* @noEscape */ $block->getNewVideoBlockName() ?>" style="display:none">
+        <?= $block->getFormHtml() ?>
+        <div id="video-player-preview-location" class="video-player-sidebar">
+            <div class="video-player-container"></div>
+            <div class="video-information title">
+                <label><?= $block->escapeHtml(__('Title:')); ?> </label><span></span>
+            </div>
+            <div class="video-information uploaded">
+                <label><?= $block->escapeHtml(__('Uploaded:')); ?> </label><span></span>
+            </div>
+            <div class="video-information uploader">
+                <label><?= $block->escapeHtml(__('Uploader:')); ?> </label><span></span>
+            </div>
+            <div class="video-information duration">
+                <label><?= $block->escapeHtml(__('Duration:')); ?> </label><span></span>
+            </div>
+        </div>
+    </div>
+
+    <?= $block->getChildHtml('new-video') ?>
+</div>
+
+<div id="popup-modal" style="display:none;">
+    <div id="compactViewContainer"></div>
+</div>
+<input type="hidden" id="p_eid" value="<?=$entity_id?>" >
+<input type="hidden" id="ajax_baseurl" value="<?php echo $block->getBaseUrl() . 'bynder/index'; ?>" >
+<input type="hidden" id="ajax_addtodb" value="<?php echo $block->getBaseUrl() . 'bynder/add'; ?>" >
+<input type="hidden" id="ajax_updatetodb" value="<?php echo $block->getBaseUrl() . 'bynder/update'; ?>" >
+<input type="hidden" id="ajax_update_bynder_baseurl" value="<?php echo $block->getBaseUrl() . 'bynder/updatedata'; ?>" >
+<input type="hidden" id="form_keys" value="<?php echo $block->getFormKey(); ?>" >
+
+<script>
+jQuery('body').trigger('contentUpdated');
+require([
+	'jquery',
+	'Magento_Ui/js/modal/modal'
+],
+function ($,modal) {
+
+	jQuery("#update_bynder_data").on("click", function () {
+		var entity_id = jQuery("#p_eid").val();
+		var up_videos = jQuery("textarea[name='product[bynder_videos]']").val();
+		var up_document = jQuery("textarea[name='product[bynder_document]']").val();
+		var up_images = jQuery("textarea[name='product[bynder_multi_img]']").val();
+		var AjaxUrl = jQuery("#ajax_update_bynder_baseurl").val();
+		var form_keys = jQuery("#form_keys").val();
+
+		var ck_id = getCookie("fcookie");
+		console.log("dev fc:-"+ck_id);
+
+		$.ajax({
+			showLoader: true,
+			url: AjaxUrl,
+			type: "POST",
+			data: { up_videos : up_videos, form_key : form_keys, up_document : up_document, up_images : up_images, entity_id : entity_id },
+			dataType: "json",
+		}).done(function (data) {
+			console.log("TEXXT");
+			console.log(data);
+			if(data.status != 0) {
+				return true;
+			}
+			else {
+				alert("Something went wrong. Please reload the page and try again..");
+				return false;
+			}
+		});
+
+	});
+
+	var AjaxUrl = jQuery("#ajax_baseurl").val();
+	var form_keys = jQuery("#form_keys").val();
+
+	jQuery("body").trigger("contentUpdated");
+	jQuery("#external_image").on("click", function () {
+		BynderCompactView.open({
+			mode: "MultiSelect",
+			onSuccess: function (assets, additionalInfo) {
+				console.log("Successfull Bynder Click...");
+				var result = assets[0];
+				var image_path = result.derivatives.webImage;
+				jQuery("#image_url").val(result.derivatives.webImage);
+				console.log("Dev : " + image_path);
+
+				var server_response = bynder_function(assets, additionalInfo);
+				if (server_response) {
+					return true;
+				}
+				else {
+					return false;
+				}
+
+			function bynder_function(assets, a) {
+				var asset = assets[0];
+				var dataset_ids = [];
+				var dataset_type = [];
+
+				$.each(assets, function (index, value) {
+					dataset_ids.push(value.databaseId);
+					dataset_type.push(value.type);
+				});
+
+				var bdomain = localStorage.getItem("cvad");
+				if (typeof bdomain == "undefined" && bdomain == null) {
+					alert("Something went wrong. Re-login system and try again...");
+				}
+
+				$.ajax({
+					showLoader: true,
+					url: AjaxUrl,
+					type: "POST",
+					data: {databaseId: dataset_ids, bdomain: bdomain, datasetType: dataset_type, form_key : form_keys },
+					dataType: "json",
+				}).done(function (data) {
+					console.log("=== Call Img ===");
+					console.log(data);
+                                        console.log("=== Call Img End ===");
+					var total_images = 0;
+					if (data.status == 2) {
+						alert(data.message);
+						return false;
+					}
+					else if (data.status == 1) {
+
+						var type_design = "";
+
+						type_design += '<div class="main-part bynder-imgbox-div">' +
+											'<div class="middle-content">' +
+											'<div class="main-one image-boxs" >';
+
+						$.each(data.data, function (index, r) {
+							$.each(r, function (i, res) {
+                                                             console.log("=== image link called Start ===");
+                                                            console.log(res);
+                                                             console.log("=== image link called End ===");
+                                                            if(res.image_link == null){
+                                                                type_design +='<h5 style="color:red;">You don\'t have access. <img src="' + res.main_link1 + '"> Please Make It Public from Bynder</h5>';
+                                                                return false;
+                                                            }else{
+
+								var dataset_tag = '<img src="' + res.image_link + '">';
+								total_images++;
+                                                                console.log("=== Each For Loop call ===");
+
+                                                                console.log("=== Each For Loop call End===");
+
+								if(res.dataset_type == "VIDEO") {
+									dataset_tag = '<video width="100%" controls><source src="' + res.image_link + '" type="video/mp4"><source src="'+res.main_link+'" type="video/ogg">Your browser does not support HTML video.</video>';
+								}
+
+								var dataset_size = '( Size: ' + res.size + ')'
+								if(res.size == "0x0") {
+									dataset_size = " ";
+								}
+
+								if(res.size == "0x0" && res.dataset_type == "DOCUMENT") {
+									type_design += '<div class="m-box">' +
+										'<div class="m-img">' +
+											dataset_tag +
+										'</div>' +
+										'<div class="m-content">' +
+											'<input type="checkbox" class="image_types" id="image_type_' + total_images + '" name="image_type_'+index+'" value="' + res.type + index + '">' +
+											'<label for="image_type_' + total_images + '">' + res.type +" "+ dataset_size +'</label>' +
+										'</div>' +
+										'</div>';
+								}
+								if(res.dataset_type == "IMAGE" || res.dataset_type == "VIDEO") {
+                                                                    if(res.dataset_type == "IMAGE"){
+                                                                        var name_od_the_image = res.type;
+                                                                    }else{
+                                                                        var name_od_the_image = res.name;
+                                                                    }
+                                                                    if(res.size != "0x0") {
+                                                                        type_design += '<div class="m-box">' +
+                                                                            '<div class="m-img">' +
+                                                                                    dataset_tag +
+                                                                            '</div>' +
+                                                                            '<div class="m-content">' +
+                                                                                    '<input type="checkbox" class="image_types" id="image_type_' + total_images + '" name="image_type_'+index+'" value="' + res.type + index + '">' +
+                                                                                    '<label for="image_type_' + total_images + '">' + name_od_the_image +" "+ dataset_size +'</label>' +
+                                                                            '</div>' +
+                                                                            '</div>';
+                                                                    }else if(res.dataset_type == "VIDEO"){
+                                                                        type_design += '<div class="m-box">' +
+                                                                            '<div class="m-img">' +
+                                                                                    dataset_tag +
+                                                                            '</div>' +
+                                                                            '<div class="m-content">' +
+                                                                                    '<input type="checkbox" class="image_types" id="image_type_' + total_images + '" name="image_type_'+index+'" value="' + res.type + index + '">' +
+                                                                                    '<label for="image_type_' + total_images + '">' + name_od_the_image +" "+ dataset_size +'</label>' +
+                                                                            '</div>' +
+                                                                            '</div>';
+                                                                    }
+								}
+
+                                                            }
+
+							});
+						});
+						type_design += '</div> </div> </div>';
+
+						$("#compactViewContainer").html(type_design);
+						var options = {
+							type: "popup",
+							responsive: true,
+							innerScroll: true,
+							title: "Select Bynder Image",
+							buttons: [{
+								text: $.mage.__("Continue"),
+								id: "selected_item_btn",
+								class: "",
+								click: function () {
+
+									var selected_types = [];
+									$(".image_types").each(function () {
+										var select_val = $(this).val();
+										if ($(this).prop("checked")) {
+											selected_types.push(select_val);
+										}
+									});
+
+									var doc_url = "";
+									var database_doc_array = [];
+									var video_url = "";
+									var database_videos_array = [];
+									if(selected_types.length > 0) {
+										var img_url = "";
+										var img_url_path = "";
+										var database_array = [];
+										$.each(data.data, function (index, r) {
+											var image_links_test = assets[index].url;
+											$.each(r, function (i, res) {
+												/*console.log("====");*/
+												/*console.log(res);*/
+												image_links_test += "&&thumb_link=" + res.image_link + "&&"
+												var type_val = res.type + index;
+												if ($.inArray(type_val, selected_types) != -1) {
+													if(res.dataset_type == "IMAGE") {
+														img_url += res.image_link + "\n";
+														img_url_path += res.image_link + ",";
+														database_array.push(res.image_link);
+													}
+													else if(res.dataset_type == "VIDEO") {
+														video_url += res.image_link+"@@"+res.main_link + "\n\n";
+														database_videos_array.push(res.image_link+"@@"+res.main_link);
+													}
+													else if(res.dataset_type == "DOCUMENT") {
+														doc_url += res.main_link+"@@"+res.name + "\n\n";
+														database_doc_array.push(res.main_link+"@@"+res.name);
+													}
+													else {
+													}
+												}
+											});
+										});
+
+										/*console.log(doc_url);*/
+
+if(img_url != "") {
+	$("textarea[name='product[bynder_multi_img]']").val($("textarea[name='product[bynder_multi_img]']").val()+"\n"+img_url);
+}
+if(video_url != "") {
+	$("textarea[name='product[bynder_videos]']").val($("textarea[name='product[bynder_videos]']").val()+"\n"+video_url);
+}
+if(doc_url != "") {
+	$("textarea[name='product[bynder_document]']").val($("textarea[name='product[bynder_document]']").val()+"\n"+doc_url);
+}
+
+										addtodatabase(database_array,database_doc_array,database_videos_array);
+										this.closeModal();
+									}
+									else {
+										alert("Sorry, you not selected any type ?");
+									}
+								}
+							}]
+						};
+						var popup = modal(options, $("#popup-modal"));
+						$("#popup-modal").modal("openModal");
+						return true;
+					}
+					else {
+						alert(data.message);
+						return false;
+					}
+				});
+			}
+		}
+	});
+
+});
+
+	var ck_id = getCookie("fcookie");
+	if(ck_id != 0) {
+
+	}
+
+
+function addtodatabase(img_data,doc_url,video_url) {
+	var ck_id = getCookie("fcookie");
+	console.log("fcookie:-"+ck_id);
+	var form_keys = $("#form_keys").val();
+	if(img_data != "" || doc_url != "" || video_url != "") {
+		if(ck_id != 0) {
+			var callurl = $("#ajax_updatetodb").val();
+			$.ajax({
+				showLoader: true,
+				url: callurl,
+				type: "POST",
+				data: { img_data : img_data, form_key : form_keys, doc_url : doc_url, video_url : video_url, ck_id : ck_id },
+				dataType: "json",
+			}).done(function (data) {
+				console.log(data);
+				var res = data;
+				if(res != 0) {
+					return true;
+				}
+				else {
+					alert("Something went wrong. Please reload the page and try again..");
+					return false;
+				}
+			});
+		}
+		else {
+			var callurl = $("#ajax_addtodb").val();
+			$.ajax({
+				showLoader: true,
+				url: callurl,
+				type: "POST",
+				data: { img_data : img_data, form_key : form_keys, doc_url : doc_url, video_url : video_url },
+				dataType: "json",
+			}).done(function (data) {
+				var res = data;
+				if(res != 0) {
+					document.cookie = "fcookie=" + res + "; path=/;";
+					return true;
+				}
+				else {
+					alert("Something went wrong. Please reload the page and try again..");
+					return false;
+				}
+			});
+		}
+	}
+	else {
+		alert("Something went wrong. Please reload the page and try again.");
+		return false;
+	}
+}
+
+function getCookie(cname) {
+	var name = cname + "=";
+	var decodedCookie = decodeURIComponent(document.cookie);
+	var ca = decodedCookie.split(';');
+	for (var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return 0;
+}
+
+function checkCookie(cookie_name) {
+	var user = getCookie(cookie_name);
+	if (user != "") {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
+			});
+</script>
