@@ -16,5 +16,11 @@
         "files": [
             "registration.php"
         ]
-    }
+    },
+    {
+      "require": {      
+        "damconsultants/bynder": "dev-master"
+      },
+      "minimum-stability": "dev"
+   }
 }
