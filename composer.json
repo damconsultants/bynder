@@ -9,10 +9,7 @@
         }
     ],
     "version": "1.0.0",
-    "license": [
-        "OSL-3.0",
-        "AFL-3.0"
-    ],
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "DamConsultants\\Bynder\\": ""
