@@ -22,6 +22,7 @@
         "php": "~7.3.0|~7.4.0"
     },
     "minimum-stability": "stable",
+    "prefer-stable": true,
     "repositories": [
     {
         "type": "vcs",
