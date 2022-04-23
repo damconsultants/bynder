@@ -2,10 +2,6 @@
 
 namespace DamConsultants\Bynder\Observer;
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 
@@ -82,7 +78,7 @@ class ProductSaveAfter implements ObserverInterface
                     }
                     $api_call = $this->b_helper->check_bynder();
                     $api_response = json_decode($api_call, true);
-                    if ($api_response['status'] == 1) {
+                    if (isset($api_response['status']) == 1) {
                         $assets_track = $this->b_helper->get_bynder_changemetadata_assets($product_url, $url_data);
                         $this->productActionObject->updateAttributes(array($productId), array('bynder_multi_img' => $bynder_multi_img), 0);
                         unset($url_data);
@@ -109,7 +105,7 @@ class ProductSaveAfter implements ObserverInterface
                     }
                     $api_call = $this->b_helper->check_bynder();
                     $api_response = json_decode($api_call, true);
-                    if ($api_response['status'] == 1) {
+                    if (isset($api_response['status']) == 1) {
                         $assets_track = $this->b_helper->get_bynder_changemetadata_assets_doc($product_url, $url_data);
                         $this->productActionObject->updateAttributes(array($productId), array('bynder_document' => $bynder_document), 0);
                         unset($url_data);
@@ -136,7 +132,7 @@ class ProductSaveAfter implements ObserverInterface
                     }
                     $api_call = $this->b_helper->check_bynder();
                     $api_response = json_decode($api_call, true);
-                    if ($api_response['status'] == 1) {
+                    if (isset($api_response['status']) == 1) {
                         $assets_track = $this->b_helper->get_bynder_changemetadata_assets_video($product_url, $url_data);
                         $this->productActionObject->updateAttributes(array($productId), array('bynder_videos' => $bynder_videos), 0);
                         unset($url_data);
@@ -166,8 +162,6 @@ class ProductSaveAfter implements ObserverInterface
                         $this->rrmdir($img_dir);
                         $this->removedb($db_id);
                         return $this->getResponse()->setBody(true);
-                        //return true;
-                        //exit;
                     }
                     if (!empty($bynder)) {
 
