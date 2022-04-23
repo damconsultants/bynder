@@ -11,4 +11,4 @@ Magento 2 Bynder Extension gives you a great opportunity to upload more “image
     1.4.3. php bin/magento setup:static-content:deploy
     
 2) Using Composer
-      composer require damconsultants/bynder:dev-main   
+      composer require damconsultants/bynder:2.0.0
