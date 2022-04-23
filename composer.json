@@ -21,7 +21,11 @@
     "require": {
         "php": "~7.3.0|~7.4.0"
     },
-    "prefer-stable": true,
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
     "repositories": [
     {
         "type": "vcs",
