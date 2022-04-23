@@ -43,7 +43,7 @@ class Categorysaveafter implements ObserverInterface
             $category_description = array_filter($url_data);
             $api_call = $this->_datahelper->check_bynder();
             $api_response = json_decode($api_call,true);
-            if ($api_response['status'] == 1) {
+            if (isset($api_response['status']) == 1) {
                 $assets = $this->_datahelper->bynder_data_cms_page($categoryUrl, $category_description);
             }
         }
