@@ -37,7 +37,7 @@ $array = json_decode($check_bynder);
                 data-ui-id="widget-button-1">
             <span><?= $block->escapeHtml(__('Add Video')) ?></span>
         </button>
-        <?php if($array->status == 1){ ?>
+        <?php if(isset($array->status) == 1){ ?>
             <button type="button" name="update_bynder_data" id="update_bynder_data" data-pid="<?=$entity_id?>" >Update bynder asset</button>
             <button type="button" name="external_image" id="external_image" >Bynder Image</button>
         <?php } ?>
