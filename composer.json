@@ -8,7 +8,7 @@
             "email": "sean@thedamconsultants.com"
         }
     ],
-    "version": "1.0.0",
+    "version": "2.0.0",
     "license": "MIT",
     "autoload": {
         "psr-4": {
@@ -18,8 +18,7 @@
             "registration.php"
         ]
     },
-    "require": {
-        "php": "~7.3.0|~7.4.0|~8.0.0|~8.1.0",
+    "require": {        
         "composer": "^2.2"
     },
     "repositories": [
