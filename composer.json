@@ -21,7 +21,7 @@
     "repositories": [
     {
         "type": "composer",
-        "url": "https://packagist.org/packages/damconsultants/bynder"
+        "url": "https://packagist.org/packages/damconsultants/bynder",
          "canonical": false
     }
 ]
