@@ -20,8 +20,9 @@
     },
     "repositories": [
     {
-        "type": "vcs",
-        "url": "https://github.com/damconsultants/bynder.git"
+        "type": "composer",
+        "url": "https://packagist.org/packages/damconsultants/bynder"
+         "canonical": false
     }
 ]
     
