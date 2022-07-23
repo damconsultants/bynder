@@ -20,17 +20,17 @@ Magento 2 Bynder Extension gives you a great opportunity to upload more “image
     
 2) Using Composer
     
-    if you try to install our extension via composer , please update your composer using below comm
+	If your php version is 7.2 or 7.4 then need composer versoin is 2.2 then you can install our extension. Using below command for install extension
 
-		=> composer self-update Or composer update
-		
-after Update our composer then Run below command ,
+		composer require damconsultants/bynder:1.0.0
 	
-	if you using our php version 7.2 or 7.4 then using below command
+	If your php version is 8.0 or 8.1 then need composer versoin is 2.3 then you can install our extension. Using below command for install extension	
 	
-		=> composer require damconsultants/bynder:1.0.0
+		composer require damconsultants/bynder:1.0.3
 		
-	And, if you using our php version 8.1 above then using below command
-
-		=> composer require damconsultants/bynder:1.0.3
+	How to Update Composer Version?
+		
+			Using Below Command to Update Composer Version
+			
+				composer self-update Or composer update
               
