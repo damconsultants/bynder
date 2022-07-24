@@ -81,7 +81,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     $product_url_key = $productData->getUrlKey();
                     $product_url = $base_url . $product_url_key . '.html';
 
-                    $data = trim((string)$bynder_multi_img);;
+                    $data = trim((string)$bynder_multi_img);
                     $url_data = array();
                     if (!empty($data)) {
                         $ex = explode("\n", $data);
@@ -165,7 +165,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     }
                     $images_json = " ";
                     if (isset($up_images_data) && !empty($up_images_data)) {
-                        $doc_url = trim((string)$up_document_data);
+                        $img_data = trim((string)$up_images_data);
                         if (!empty($img_data)) {
                             $ex = explode("\n", $img_data);
                             $ex = array_filter($ex);
