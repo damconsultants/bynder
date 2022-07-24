@@ -262,6 +262,10 @@ require([
 												setTimeout( function() { 
 													jQuery(".mce-container-body.mce-flow-layout div[aria-label='Bold'] button")[0].click();
 												}, 500);
+												
+												setTimeout(function () {
+														jQuery("#product_form_short_description")[0].click();
+												},500);
 
 											}
 											*/
