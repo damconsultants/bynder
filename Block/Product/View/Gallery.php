@@ -117,13 +117,13 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
         $use_bynder_cdn = $product->getData('use_bynder_cdn');
         if ($use_bynder_cdn == 1) {
             $img_attr = $product->getData('bynder_multi_img');
-            $bynder_image = trim($img_attr);
+            $bynder_image = trim((string)$img_attr);
             if (!empty($bynder_image)) {
                 $byder_image_array = explode("\n", $bynder_image);
                 $cookie_array = array_filter($byder_image_array);
                 $i = 1;
                 foreach ($cookie_array as $values) {
-                    $values = trim($values);
+                    $values = trim((string)$values);
                     if ($i == 1 && !empty($values)) {
                         return $values;
                         $i++;
@@ -171,7 +171,7 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
             $byder_videos_array = explode("\n", $bynder_videos);
             $cookie_array = array_filter($byder_videos_array);
             foreach ($cookie_array as $v) {
-                $v = trim($v);
+                $v = trim((string)$v);
                 if (!empty($v)) {
                     $thumb_img = "";
                     $thumb = explode("@@", $v);
@@ -229,7 +229,7 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
                 $byder_image_array = explode("\n", $bynder_image);
                 $cookie_array = array_filter($byder_image_array);
                 foreach ($cookie_array as $values) {
-                    $values = trim($values);
+                    $values = trim((string)$values);
                     $imageItem = new DataObject([
                         'thumb' => $values,
                         'img' => $values,
@@ -249,7 +249,7 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
                 $byder_image_array = explode("\n", $bynder_image);
                 $cookie_array = array_filter($byder_image_array);
                 foreach ($cookie_array as $values) {
-                    $values = trim($values);
+                    $values = trim((string)$values);
                     if (!empty($values)) {
                         $imageItem = new DataObject([
                             'thumb' => $values,
