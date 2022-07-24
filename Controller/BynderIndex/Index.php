@@ -45,7 +45,7 @@ class Index extends \Magento\Framework\App\Action\Action
         if ($this->getRequest()->isAjax()) {
             if (isset($img_data_post) && count($img_data_post) > 0) {
                 if (isset($dir_path_post) && !empty($dir_path_post)) {
-                    $img_dir = BP . '/pub/media/' . $dir_path_post;
+                    $img_dir = BP . '/pub/media/wysiwyg/' . $dir_path_post;
                     if (!is_dir($img_dir)) {
                         mkdir($img_dir, 0755, true);
                     }
@@ -56,7 +56,7 @@ class Index extends \Magento\Framework\App\Action\Action
                             $basename = basename($item_url);
                             $file_name = explode("?", $basename);
                             $file_name = $file_name[0];
-                            $file_name = str_replace("%20", " ", $file_name);
+                            $file_name = str_replace("%20", "-", $file_name);
                             $img_url = $img_dir . "/" . $file_name;
                             file_put_contents(
                                 $img_url,
