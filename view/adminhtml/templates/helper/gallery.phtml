@@ -12,7 +12,8 @@ $elementNameEscaped = $block->escapeHtmlAttr($block->getElement()->getName()) . 
 $formNameEscaped = $block->escapeHtmlAttr($block->getFormName());
 
 unset($_COOKIE['fcookie']);
-setcookie('fcookie', null, -1, '/');
+$value = "";
+setcookie("fcookie", $value);
 
 $entity_id = $this->getRequest()->getParam('id');
 if(isset($entity_id) && !empty($entity_id)) {
