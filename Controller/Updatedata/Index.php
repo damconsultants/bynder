@@ -81,7 +81,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     $product_url_key = $productData->getUrlKey();
                     $product_url = $base_url . $product_url_key . '.html';
 
-                    $data = trim($bynder_multi_img);
+                    $data = trim((string)$bynder_multi_img);;
                     $url_data = array();
                     if (!empty($data)) {
                         $ex = explode("\n", $data);
@@ -133,7 +133,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     $id = $fcookie;
                     $video_json = " ";
                     if (isset($up_videos_data) && !empty($up_videos_data)) {
-                        $video_url = trim($up_videos_data);
+                        $video_url = trim((string)$up_videos_data);
                         if (!empty($video_url)) {
                             $ex = explode("\n", $video_url);
                             $ex = array_filter($ex);
@@ -149,7 +149,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     }
                     $doc_json = " ";
                     if (isset($up_document_data) && !empty($up_document_data)) {
-                        $doc_url = trim($up_document_data);
+                        $doc_url = trim((string)$up_document_data);
                         if (!empty($doc_url)) {
                             $ex = explode("\n", $doc_url);
                             $ex = array_filter($ex);
@@ -165,7 +165,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     }
                     $images_json = " ";
                     if (isset($up_images_data) && !empty($up_images_data)) {
-                        $img_data = trim($up_images_data);
+                        $doc_url = trim((string)$up_document_data);
                         if (!empty($img_data)) {
                             $ex = explode("\n", $img_data);
                             $ex = array_filter($ex);
