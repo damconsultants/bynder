@@ -59,7 +59,7 @@ class ProductSaveAfter implements ObserverInterface
 
                 if ($result && is_array($result) == 1 && isset($result["images_json"]) && !empty($result["images_json"])) {
                     $url_data = [];
-                    $data = trim($bynder_multi_img);
+                    $data = trim((string)$bynder_multi_img);
                     if (!empty($data)) {
                         $ex = explode("\n", $data);
                         $ex = array_filter($ex);
@@ -86,7 +86,7 @@ class ProductSaveAfter implements ObserverInterface
                 }
                 if ($result && is_array($result) == 1 && isset($result["doc_json"]) && !empty($result["doc_json"])) {
                     $url_data = [];
-                    $data = trim($bynder_document);
+                    $data = trim((string)$bynder_document);
                     if (!empty($data)) {
                         $ex = explode("\n", $data);
                         $ex = array_filter($ex);
@@ -113,7 +113,7 @@ class ProductSaveAfter implements ObserverInterface
                 }
                 if ($result && is_array($result) == 1 && isset($result["video_url"]) && !empty($result["video_url"])) {
                     $url_data = [];
-                    $data = trim($bynder_videos);
+                    $data = trim((string)$bynder_videos);
                     if (!empty($data)) {
                         $ex = explode("\n", $data);
                         $ex = array_filter($ex);
@@ -139,6 +139,32 @@ class ProductSaveAfter implements ObserverInterface
                     }
                 }
             }
+            
+            $arr = array(
+                $product->getShortDescription()
+            );
+
+            $url_data = [];
+
+            $str = implode(" ", $arr);
+            $image_arr = explode(" ", $str);
+            foreach ($image_arr as $a) {
+                preg_match('@src="([^"]+)"@', $a, $match);
+                $src = array_pop($match);
+                $img_arr = explode('?', (string)$src);
+                $url_data[] = $img_arr[0];
+            }
+
+            if (!empty($url_data)) {
+                $getShortDescription = array_filter($url_data);
+
+                $api_call = $this->b_helper->check_bynder();
+                $api_response = json_decode($api_call, true);
+                if (isset($api_response['status']) == 1) {
+                    $assets = $this->b_helper->bynder_data_cms_page($product_url, $getShortDescription);
+                }
+            }
+            
             if ($bynder_image_import == 1) {
                 $img_dir = BP . '/pub/media/temp/';
                 if (isset($fcookie) && !empty($fcookie)) {
@@ -161,7 +187,8 @@ class ProductSaveAfter implements ObserverInterface
                         $this->b_helper->unsetcookie();
                         $this->rrmdir($img_dir);
                         $this->removedb($db_id);
-                        return $this->getResponse()->setBody(true);
+                        /*return $this->getResponse()->setBody(true);*/
+                        return true;
                     }
                     if (!empty($bynder)) {
 
