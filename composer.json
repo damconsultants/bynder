@@ -18,12 +18,15 @@
             "registration.php"
         ]
     },
+    "require": {
+        "php": "~8.0.0|~8.1.0",
+        "composer": "^2.3"
+    },
     "repositories": [
-    {
-        "type": "composer",
-        "url": "https://packagist.org/packages/damconsultants/bynder",
-         "canonical": false
-    }
-]
+        {
+            "type": "vcs",
+            "url": "https://github.com/damconsultants/bynder.git"
+        }
+    ]
     
 }
