@@ -2,9 +2,9 @@
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
    <table name="bynder_data_product" resource="default" engine="innodb" comment="bynder data product">
       <column xsi:type="int" name="bynder_id" padding="7" unsigned="false" nullable="false" identity="true" comment="bynder id" />
-      <column xsi:type="text" name="images_json" nullable="false" length="64k" comment="images_json" />
-      <column xsi:type="text" name="doc_json" nullable="false" length="64k" comment="doc_json" />
-      <column xsi:type="text" name="video_url" nullable="false" length="64k" comment="video_url" />
+      <column xsi:type="text" name="images_json" nullable="true"  comment="images_json" />
+      <column xsi:type="text" name="doc_json" nullable="true"  comment="doc_json" />
+      <column xsi:type="text" name="video_url" nullable="true" comment="video_url" />
       <constraint xsi:type="primary" referenceId="PRIMARY">
          <column name="bynder_id" />
       </constraint>
