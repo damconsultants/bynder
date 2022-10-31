@@ -7,7 +7,7 @@ Magento 2 Bynder Extension gives you a great opportunity to upload more “image
   
     1.2. Unzip the file in a temporary directory/folder with name as Bynder.
    
-    1.3. Put Admin IP Restriction directory as per this folder structure: project_root/app/code/ DamConsultants / Bynder
+    1.3. Put directory as per this folder structure: project_root/app/code/ DamConsultants / Bynder
   
     1.4. Run the following command in Magento 2 root folder
   
