@@ -1,0 +1,68 @@
+<?php
+$get_metaData = $block->getMetaData()['metadata'];
+$selected_property_name = $block->getMetaData()['property_name'];
+
+?>
+
+<form name="metaproperty" action="<?php echo $block->getSubmitUrl(); ?>" method="post" enctype="multipart/form-data">
+    <?php echo $block->getBlockHtml('formkey')
+    ?>
+    <div class="main_container dear-stock-sec">
+        <div class="main_header_master admin__data-grid-wrap">
+            <div class="main_container_masterdata admin__data-grid-wrap product-imp-sec">
+                <label> <strong>Image Configration:-</strong> </label> <br><br>
+                <div class="form-check form-check-inline" style="float: left;width: 100%;">
+
+                    <?php
+                    if (count($get_metaData) === 0) { ?>
+                        <label class="form-check-label">
+                            <p>Bynder property not getting.</p>
+                            <?php } else {
+
+                            foreach ($get_metaData as $v) {
+                                $checked = "";
+                                if ($selected_property_name == $v["name"]) {
+                                    $checked = "checked";
+                                }
+                            ?>
+                                <label class="form-check-label">
+                                    <input type="radio" name="select_meta_tag" class="form-check-input meta_tag_options" value="<?php echo $v['name']; ?>" <?php echo $checked; ?> /> <?php echo $v["label"]; ?>
+                                </label>
+                                </br>
+                        <?php
+                            }
+                        }
+                        ?>
+                        <button type="submit" class="action- scalable primary" name="submit" id="btn_submit"><span><?php echo __('Save Property'); ?></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<style type="text/css">
+    .product-imp-sec {
+        max-width: 100%;
+        border: 1px solid #777777;
+        padding: 24px;
+        border-radius: 0px;
+    }
+
+    .dear-stock-sec .actions-split:hover,
+    .product-imp-sec button.primary {
+        box-shadow: none;
+        margin-left: auto;
+        display: block;
+        margin-top: 10px;
+    }
+
+    .main_header_master .main_container_masterdata .form-check {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .main_header_master .main_container_masterdata .form-check .form-check-label {
+        width: calc(25% - 10px);
+        margin: 5px;
+    }
+</style>

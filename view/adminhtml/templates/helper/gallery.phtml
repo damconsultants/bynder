@@ -27,7 +27,26 @@ $helper = $this->helper('DamConsultants\Bynder\Helper\Data');
 $check_bynder = $helper->check_bynder();
 $array = json_decode($check_bynder);
 ?>
+<style>
+    .success-msg-sync,
+    .error-msg-sync {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 3px 3px 3px 3px;
+    }
 
+    .success-msg-sync {
+        color: #270;
+        background-color: #DFF2BF;
+    }
+
+    .error-msg-sync {
+        color: #D8000C;
+        background-color: #FFBABA;
+    }
+</style>
+<div class="success-msg-sync" style="display:none;"></div>
+<div class="error-msg-sync" style="display:none;"></div>
 <div class="row">
     <div class="add-video-button-container">
         <button id="add_video_button"
@@ -400,13 +419,27 @@ function ($,modal) {
 				}).done(function (data) {
 					console.log("=== Call Img ===");
 					console.log(data);
-                                        console.log("=== Call Img End ===");
+                    console.log("=== Call Img End ===");
 					var total_images = 0;
 					if (data.status == 2) {
-						alert(data.message);
+						//alert(data.message);
+                        $(".success-msg-sync").hide();
+                        $(".error-msg-sync").show();
+                        $(".error-msg-sync").html(data.message);
+                        setTimeout(function() { // wait for 5 secs(2)
+                            //location.reload(); // then reload the page.(3)
+                            $('.error-msg-sync').delay(5000).fadeOut('slow');
+                        }, 5000);
 						return false;
-					}
-					else if (data.status == 1) {
+					}else if(data.status == 0){
+                        $(".success-msg-sync").hide();
+                        $(".error-msg-sync").show();
+                        $(".error-msg-sync").html(data.message);
+                        setTimeout(function() { // wait for 5 secs(2)
+                            //location.reload(); // then reload the page.(3)
+                            $('.error-msg-sync').delay(5000).fadeOut('slow');
+                        }, 5000);
+                    }else if (data.status == 1) {
 
 						var type_design = "";
 
@@ -527,11 +560,12 @@ function ($,modal) {
 														database_array.push(res.image_link);
 													}
 													else if(res.dataset_type == "VIDEO") {
-														video_url += res.image_link+"@@"+res.main_link + "\n\n";
+                                                        
+														video_url += res.image_link+"@@"+res.main_link + "\n";
 														database_videos_array.push(res.image_link+"@@"+res.main_link);
 													}
 													else if(res.dataset_type == "DOCUMENT") {
-														doc_url += res.main_link+"@@"+res.name + "\n\n";
+														doc_url += res.main_link+"@@"+res.name + "\n";
 														database_doc_array.push(res.main_link+"@@"+res.name);
 													}
 													else {
@@ -546,6 +580,7 @@ if(img_url != "") {
 	$("textarea[name='product[bynder_multi_img]']").val($("textarea[name='product[bynder_multi_img]']").val()+"\n"+img_url);
 }
 if(video_url != "") {
+   
 	$("textarea[name='product[bynder_videos]']").val($("textarea[name='product[bynder_videos]']").val()+"\n"+video_url);
 }
 if(doc_url != "") {
@@ -556,7 +591,14 @@ if(doc_url != "") {
 										this.closeModal();
 									}
 									else {
-										alert("Sorry, you not selected any type ?");
+										//alert("Sorry, you not selected any type ?");
+                                        $(".success-msg-sync").hide();
+                                        $(".error-msg-sync").show();
+                                        $(".error-msg-sync").html("Sorry, you not selected any type ?");
+                                        setTimeout(function() { // wait for 5 secs(2)
+                                                  //location.reload(); // then reload the page.(3)
+                                            $('.error-msg-sync').delay(5000).fadeOut('slow');
+                                        }, 5000);
 									}
 								}
 							}]
@@ -566,7 +608,14 @@ if(doc_url != "") {
 						return true;
 					}
 					else {
-						alert(data.message);
+						//alert(data.message);
+                        $(".success-msg-sync").hide();
+                        $(".error-msg-sync").show();
+                        $(".error-msg-sync").html(data.message);
+                        setTimeout(function() { // wait for 5 secs(2)
+                            //location.reload(); // then reload the page.(3)
+                            $('.error-msg-sync').delay(5000).fadeOut('slow');
+                        }, 5000);
 						return false;
 					}
 				});
@@ -602,7 +651,14 @@ function addtodatabase(img_data,doc_url,video_url) {
 					return true;
 				}
 				else {
-					alert("Something went wrong. Please reload the page and try again..");
+					//alert("Something went wrong. Please reload the page and try again..");
+                                        $(".success-msg-sync").hide();
+                                        $(".error-msg-sync").show();
+                                        $(".error-msg-sync").html("Something went wrong. Please reload the page and try again..");
+                                        setTimeout(function() { // wait for 5 secs(2)
+                                                  //location.reload(); // then reload the page.(3)
+                                            $('.error-msg-sync').delay(5000).fadeOut('slow');
+                                        }, 5000);
 					return false;
 				}
 			});
@@ -622,14 +678,28 @@ function addtodatabase(img_data,doc_url,video_url) {
 					return true;
 				}
 				else {
-					alert("Something went wrong. Please reload the page and try again..");
+					//alert("Something went wrong. Please reload the page and try again..");
+                    $(".success-msg-sync").hide();
+                                        $(".error-msg-sync").show();
+                                        $(".error-msg-sync").html("Something went wrong. Please reload the page and try again..");
+                                        setTimeout(function() { // wait for 5 secs(2)
+                                                  //location.reload(); // then reload the page.(3)
+                                            $('.error-msg-sync').delay(5000).fadeOut('slow');
+                                        }, 5000);
 					return false;
 				}
 			});
 		}
 	}
 	else {
-		alert("Something went wrong. Please reload the page and try again.");
+		//alert("Something went wrong. Please reload the page and try again.");
+        $(".success-msg-sync").hide();
+                                        $(".error-msg-sync").show();
+                                        $(".error-msg-sync").html("Something went wrong. Please reload the page and try again..");
+                                        setTimeout(function() { // wait for 5 secs(2)
+                                                  //location.reload(); // then reload the page.(3)
+                                            $('.error-msg-sync').delay(5000).fadeOut('slow');
+                                        }, 5000);
 		return false;
 	}
 }

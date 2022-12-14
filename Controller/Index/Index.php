@@ -23,8 +23,8 @@ use DamConsultants\Bynder\Helper\Data;
 class Index extends \Magento\Framework\App\Action\Action
 {
 
-    public $clientId = "";
-    public $clientSecret = "";
+    /*public $clientId = "";
+    public $clientSecret = "";*/
     public $bynderDomain = "";
     public $permanent_token = "";
     public $by_redirecturl;
@@ -69,8 +69,8 @@ class Index extends \Magento\Framework\App\Action\Action
                         );
                         if ($bdomain_chk_cookies == $bdomain_chk_config) {
                             $bynder_auth = array(
-                                "clientId" => $this->b_datahelper->ClientId(),
-                                "clientSecret" => $this->b_datahelper->SecretKey(),
+                                /*"clientId" => $this->b_datahelper->ClientId(),
+                                "clientSecret" => $this->b_datahelper->SecretKey(),*/
                                 "bynderDomain" => $bdomain_chk_config,
                                 "redirectUri" => $this->b_datahelper->redirecturl(),
                                 "token" => $this->b_datahelper->PermanentToken(),
@@ -90,8 +90,7 @@ class Index extends \Magento\Framework\App\Action\Action
                                 $res_array["message"] = $api_response["message"];
                             }
                         } else {
-                            $res_array["message"] = "Please Check Your Entered Bynder Domain |
-                            Please Check Your Credentials";
+                            $res_array["message"] = "Please Check Your Entered Bynder Domain | Please Check Your Credentials";
                         }
                     } else {
                         $res_array["message"] = $bynder_auth;
@@ -100,8 +99,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     $res_array["message"] = "Please check your credentials |";
                 }*/
             } else {
-                $res_array["message"] = "Please check your credentials |
-                session has expired. please logout and login again";
+                $res_array["message"] = "Please check your credentials | session has expired. please logout and login again";
             }
         }
         $json_data = json_encode($res_array);

@@ -8,7 +8,7 @@
             "email": "sean@thedamconsultants.com"
         }
     ],
-    "version": "1.0.4",
+    "version": "1.0.5",
     "license": "MIT",
     "autoload": {
         "psr-4": {
@@ -19,14 +19,13 @@
         ]
     },
     "require": {
-        "php": "~8.0.0|~8.1.0",
-        "composer": "^2.4"
+        "php": "~7.3.0|~7.4.0|~8.0.0|~8.1.0"
     },
     "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/damconsultants/bynder.git"
-        }
-    ]
+    {
+        "type": "vcs",
+        "url": "https://github.com/damconsultants/bynder.git"
+    }
+]
     
 }

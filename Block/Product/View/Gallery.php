@@ -63,7 +63,9 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
         ArrayUtils $arrayUtils,
         \Magento\Framework\Json\EncoderInterface $jsonEncoder,
         \Magento\Framework\Registry $Registry,
+        \Magento\Theme\Block\Html\Header\Logo $logo,
         ImagesConfigFactoryInterface $imagesConfigFactory = null,
+        
         array $galleryImagesConfig = [],
         UrlBuilder $urlBuilder = null,
         array $data = []
@@ -78,6 +80,7 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
             $urlBuilder
         );
         $this->jsonEncoder = $jsonEncoder;
+        $this->_logo = $logo;
         $this->galleryImagesConfigFactory = $imagesConfigFactory ?: ObjectManager::getInstance()
                         ->get(ImagesConfigFactoryInterface::class);
         $this->galleryImagesConfig = $galleryImagesConfig;
@@ -117,13 +120,14 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
         $use_bynder_cdn = $product->getData('use_bynder_cdn');
         if ($use_bynder_cdn == 1) {
             $img_attr = $product->getData('bynder_multi_img');
-            $bynder_image = trim((string)$img_attr);
+            $bynder_image = trim($img_attr);
+           
             if (!empty($bynder_image)) {
-                $byder_image_array = explode("\n", $bynder_image);
+                $byder_image_array = explode(" \n", $bynder_image);
                 $cookie_array = array_filter($byder_image_array);
                 $i = 1;
                 foreach ($cookie_array as $values) {
-                    $values = trim((string)$values);
+                    $values = trim($values);
                     if ($i == 1 && !empty($values)) {
                         return $values;
                         $i++;
@@ -168,15 +172,20 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
         $use_bynder_both_image = $product->getData('use_bynder_both_image');
         if (!empty($product->getData('bynder_videos'))) {
             $bynder_videos = $product->getData('bynder_videos');
-            $byder_videos_array = explode("\n", $bynder_videos);
+            $byder_videos_array = explode(" ", $bynder_videos);
             $cookie_array = array_filter($byder_videos_array);
             foreach ($cookie_array as $v) {
-                $v = trim((string)$v);
+                $v = trim($v);
                 if (!empty($v)) {
                     $thumb_img = "";
                     $thumb = explode("@@", $v);
                     if (isset($thumb[0]) && isset($thumb[1])) {
                         $thumb_img = $thumb[1];
+                    }
+                    if(empty($thumb_img)){
+                        $thumb_img = $this->_logo->getLogoSrc();
+                    }else{
+                        $thumb_img;
                     }
                     $v = explode("?", $v);
                     $item_array[] = array(
@@ -226,10 +235,10 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
             }
             if (!empty($product->getData('bynder_multi_img'))) {
                 $bynder_image = $product->getData('bynder_multi_img');
-                $byder_image_array = explode("\n", $bynder_image);
+                $byder_image_array = explode(" ", $bynder_image);
                 $cookie_array = array_filter($byder_image_array);
                 foreach ($cookie_array as $values) {
-                    $values = trim((string)$values);
+                    $values = trim($values);
                     $imageItem = new DataObject([
                         'thumb' => $values,
                         'img' => $values,
@@ -246,10 +255,10 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
         } elseif ($use_bynder_cdn == 1) { /*CDN Image*/
             if (!empty($product->getData('bynder_multi_img'))) {
                 $bynder_image = $product->getData('bynder_multi_img');
-                $byder_image_array = explode("\n", $bynder_image);
+                $byder_image_array = explode(" ", $bynder_image);
                 $cookie_array = array_filter($byder_image_array);
                 foreach ($cookie_array as $values) {
-                    $values = trim((string)$values);
+                    $values = trim($values);
                     if (!empty($values)) {
                         $imageItem = new DataObject([
                             'thumb' => $values,

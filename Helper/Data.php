@@ -16,16 +16,16 @@ class Data extends AbstractHelper
     protected $filesystem;
     protected $_scopeConfig;
     public $by_redirecturl;
-    public $clientId = "";
-    public $clientSecret = "";
+    /*public $clientId = "";
+    public $clientSecret = "";*/
     public $bynderDomain = "";
     public $permanent_token = "";
-    const CLIENT_ID = 'bynderconfig/bynder_credential/clientid';
-    const SECRET_KEY = 'bynderconfig/bynder_credential/secretkey';
+    /*const CLIENT_ID = 'bynderconfig/bynder_credential/clientid';
+    const SECRET_KEY = 'bynderconfig/bynder_credential/secretkey';*/
     const BYNDER_DOMAIN = 'bynderconfig/bynder_credential/bynderdomain';
     const PERMANENT_TOKEN = 'bynderconfig/bynder_credential/permanent_token';
     const LICENCE_TOKEN = 'bynderconfig/bynder_credential/licenses_key';
-
+    const RADIO_BUTTON = 'byndeimageconfig/bynder_image/selectimage';
     const API_CALLED = 'https://trello.thedamconsultants.com/';
 
     public function __construct(
@@ -120,14 +120,14 @@ class Data extends AbstractHelper
     {
         return $this->_scopeConfig->getValue($storePath, ScopeInterface::SCOPE_STORE, $storeId);
     }
-    public function getClientId()
+    /*public function getClientId()
     {
         return (string) $this->getStoreConfig(self::CLIENT_ID);
     }
     public function getSecretKey()
     {
         return (string) $this->getStoreConfig(self::SECRET_KEY);
-    }
+    }*/
     public function getBynderDomain()
     {
         return (string) $this->getStoreConfig(self::BYNDER_DOMAIN);
@@ -142,14 +142,19 @@ class Data extends AbstractHelper
         return (string) $this->getStoreConfig(self::LICENCE_TOKEN);
     }
 
-    public function ClientId()
+    public function byndeimageconfig()
+    {
+        return (string) $this->getStoreConfig(self::RADIO_BUTTON);
+    }
+
+    /*public function ClientId()
     {
         return (string) $this->getConfig(self::CLIENT_ID);
     }
     public function SecretKey()
     {
         return (string) $this->getConfig(self::SECRET_KEY);
-    }
+    }*/
     public function BynderDomain()
     {
         return (string) $this->getConfig(self::BYNDER_DOMAIN);
@@ -158,14 +163,15 @@ class Data extends AbstractHelper
     {
         return (string) $this->getConfig(self::PERMANENT_TOKEN);
     }
+
     public function getLoadCredential()
     {
-        $this->clientId = $this->ClientId();
-        $this->clientSecret = $this->SecretKey();
+        /*$this->clientId = $this->ClientId();
+        $this->clientSecret = $this->SecretKey();*/
         $this->bynderDomain = $this->BynderDomain();
         $this->permanent_token = $this->PermanentToken();
         $this->by_redirecturl = $this->redirecturl();
-        if (!empty($this->clientId) && !empty($this->clientSecret) && !empty($this->bynderDomain) && !empty($this->permanent_token) && !empty($this->by_redirecturl)) {
+        if (/*!empty($this->clientId) && !empty($this->clientSecret) && */!empty($this->bynderDomain) && !empty($this->permanent_token) && !empty($this->by_redirecturl)) {
             return 1;
         } else {
             return "Bynder authentication failed | Please check your credential";
@@ -193,12 +199,12 @@ class Data extends AbstractHelper
             'base_url' => $this->_storeManager->getStore()->getBaseUrl(),
             'licence_token' => $this->getLicenceToken()
         );
-       
+
         $fields = json_encode($fields);
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::API_CALLED.'check-bynder-license',
+            CURLOPT_URL => self::API_CALLED . 'check-bynder-license',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -218,8 +224,8 @@ class Data extends AbstractHelper
     {
 
         $fields = array(
-            'client_id' => $bynder_auth['clientId'],
-            'client_secret' => $bynder_auth['clientSecret'],
+            /*'client_id' => $bynder_auth['clientId'],
+            'client_secret' => $bynder_auth['clientSecret'],*/
             'bynder_domain' => $bynder_auth['bynderDomain'],
             'redirectUri' => $bynder_auth['redirectUri'],
             'permanent_token' => $bynder_auth['token'],
@@ -232,7 +238,7 @@ class Data extends AbstractHelper
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::API_CALLED.'magento-derivatives',
+            CURLOPT_URL => self::API_CALLED . 'magento-derivatives',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -244,7 +250,7 @@ class Data extends AbstractHelper
         ));
 
         $response = curl_exec($curl);
-      
+
 
         curl_close($curl);
         return $response;
@@ -260,7 +266,7 @@ class Data extends AbstractHelper
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::API_CALLED.'get-license-key',
+            CURLOPT_URL => self::API_CALLED . 'get-license-key',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -269,7 +275,7 @@ class Data extends AbstractHelper
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $fields,
-           
+
         ));
 
         $response = curl_exec($curl);
@@ -278,12 +284,11 @@ class Data extends AbstractHelper
         return $response;
     }
 
-    public function get_bynder_changemetadata_assets($product_url,$url_data){
+    public function get_bynder_changemetadata_assets($product_url, $url_data)
+    {
 
         $fields = array(
             'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
-            'client_id' => $this->ClientId(),
-            'client_secret' => $this->SecretKey(),
             'bynder_domain' => $this->BynderDomain(),
             'permanent_token' => $this->PermanentToken(),
             'licence_token' => $this->getLicenceToken(),
@@ -295,7 +300,7 @@ class Data extends AbstractHelper
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::API_CALLED.'change-metadata-magento',
+            CURLOPT_URL => self::API_CALLED . 'change-metadata-magento',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -308,16 +313,17 @@ class Data extends AbstractHelper
 
         $response = curl_exec($curl);
         curl_close($curl);
-        return $response;
 
+        return $response;
     }
 
-    public function get_bynder_changemetadata_assets_doc($product_url,$url_data){
+    public function get_bynder_changemetadata_assets_doc($product_url, $url_data)
+    {
 
         $fields = array(
             'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
-            'client_id' => $this->ClientId(),
-            'client_secret' => $this->SecretKey(),
+            /*'client_id' => $this->ClientId(),
+            'client_secret' => $this->SecretKey(),*/
             'bynder_domain' => $this->BynderDomain(),
             'permanent_token' => $this->PermanentToken(),
             'licence_token' => $this->getLicenceToken(),
@@ -329,7 +335,7 @@ class Data extends AbstractHelper
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::API_CALLED.'change-metadata-magento-doc',
+            CURLOPT_URL => self::API_CALLED . 'change-metadata-magento-doc',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -343,15 +349,13 @@ class Data extends AbstractHelper
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
-
     }
 
-    public function get_bynder_changemetadata_assets_video($product_url,$url_data){
+    public function get_bynder_changemetadata_assets_video($product_url, $url_data)
+    {
 
         $fields = array(
             'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
-            'client_id' => $this->ClientId(),
-            'client_secret' => $this->SecretKey(),
             'bynder_domain' => $this->BynderDomain(),
             'permanent_token' => $this->PermanentToken(),
             'licence_token' => $this->getLicenceToken(),
@@ -363,7 +367,7 @@ class Data extends AbstractHelper
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::API_CALLED.'change-metadata-magento-video',
+            CURLOPT_URL => self::API_CALLED . 'change-metadata-magento-video',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -377,15 +381,15 @@ class Data extends AbstractHelper
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
-
     }
 
-    public function bynder_data_cms_page($CMSPageURL,$url_data){
+    public function bynder_data_cms_page($CMSPageURL, $url_data)
+    {
 
         $fields = array(
             'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
-            'client_id' => $this->ClientId(),
-            'client_secret' => $this->SecretKey(),
+            /*'client_id' => $this->ClientId(),
+            'client_secret' => $this->SecretKey(),*/
             'bynder_domain' => $this->BynderDomain(),
             'permanent_token' => $this->PermanentToken(),
             'licence_token' => $this->getLicenceToken(),
@@ -397,7 +401,7 @@ class Data extends AbstractHelper
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::API_CALLED.'change-metadata-magento-cms-page',
+            CURLOPT_URL => self::API_CALLED . 'change-metadata-magento-cms-page',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -411,14 +415,47 @@ class Data extends AbstractHelper
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
-
     }
 
-    public function bynder_changemetadata_delete_assets($product_url,$url_data){
+    public function bynder_changemetadata_delete_assets($product_url, $url_data)
+    {
         $fields = array(
             'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
-            'client_id' => $this->ClientId(),
-            'client_secret' => $this->SecretKey(),
+            'bynder_domain' => $this->BynderDomain(),
+            'permanent_token' => $this->PermanentToken(),
+            'licence_token' => $this->getLicenceToken(),
+            'product_url' => $product_url,
+            'bynder_multi_img' => $url_data
+        );
+
+        //echo "<pre>";print_r($fields);die;
+
+        $fields = json_encode($fields);
+
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => self::API_CALLED . 'change-metadata-magento-delete-assets',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $fields,
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
+    public function bynder_changemetadata_delete_video_assets($product_url, $url_data)
+    {
+        $fields = array(
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
             'bynder_domain' => $this->BynderDomain(),
             'permanent_token' => $this->PermanentToken(),
             'licence_token' => $this->getLicenceToken(),
@@ -427,12 +464,12 @@ class Data extends AbstractHelper
         );
 
         $fields = json_encode($fields);
-        
+
 
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => self::API_CALLED.'change-metadata-magento-delete-assets',
+            CURLOPT_URL => self::API_CALLED . 'change-metadata-magento-delete-video-assets',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -446,6 +483,170 @@ class Data extends AbstractHelper
         $response = curl_exec($curl);
         curl_close($curl);
         return $response;
+    }
 
+    public function bynder_changemetadata_delete_doc_assets($product_url, $url_data)
+    {
+        $fields = array(
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $this->BynderDomain(),
+            'permanent_token' => $this->PermanentToken(),
+            'licence_token' => $this->getLicenceToken(),
+            'product_url' => $product_url,
+            'bynder_multi_img' => $url_data
+        );
+
+        $fields = json_encode($fields);
+
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => self::API_CALLED . 'change-metadata-magento-delete-doc-assets',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $fields,
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
+    public function get_bynder_meta_properites()
+    {
+        $fields = array(
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $this->BynderDomain(),
+            'permanent_token' => $this->PermanentToken(),
+            'licence_token' => $this->getLicenceToken()
+        );
+
+        $fields = json_encode($fields);
+
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => self::API_CALLED . 'get-bynder-meta-properites',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $fields,
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
+    public function image_sync_with_properties($sku_id,$property_id)
+    {
+        $fields = array(
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $this->BynderDomain(),
+            'permanent_token' => $this->PermanentToken(),
+            'licence_token' => $this->getLicenceToken(),
+            'sku_id' => $sku_id,
+            'property_id' => $property_id
+        );
+        
+        $fields = json_encode($fields);
+
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => self::API_CALLED . 'bynder-skudetails',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $fields,
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
+    public function data_remove_for_magento($sku_id,$media_Id,$metaProperty_id)
+    {
+        $fields = array(
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $this->BynderDomain(),
+            'permanent_token' => $this->PermanentToken(),
+            'licence_token' => $this->getLicenceToken(),
+            'sku_id' => $sku_id,
+            'media_id' => $media_Id,
+            'property_id' => $metaProperty_id
+        );
+        
+        $fields = json_encode($fields);
+
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => self::API_CALLED . 'sku-data-remove-for-magento',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $fields,
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
+    public function added_compactview_sku_from_bynder($sku_id,$media_Id,$metaProperty_id)
+    {
+        $fields = array(
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $this->BynderDomain(),
+            'permanent_token' => $this->PermanentToken(),
+            'licence_token' => $this->getLicenceToken(),
+            'sku_id' => $sku_id,
+            'media_id' => $media_Id,
+            'property_id' => $metaProperty_id
+        );
+        
+        $fields = json_encode($fields);
+
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => self::API_CALLED . 'added-compactview-sku-from-bynder',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $fields,
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
     }
 }

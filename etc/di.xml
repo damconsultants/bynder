@@ -3,4 +3,17 @@
     <!--<type name="Magento\Config\Model\Config">
         <plugin name="admin_system_config_save_plugin" type="DamConsultants\Bynder\Plugin\ConfigPlugin" sortOrder="1"/>
     </type>-->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="bynder_index_listing_data_source" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">bynder_data_product</argument>
+            <argument name="resourceModel" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\Bynder</argument>
+        </arguments>
+    </virtualType>
 </config>

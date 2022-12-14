@@ -7,8 +7,7 @@
     <event name="catalog_product_save_after">
         <observer name="save_bynder_image_data" instance="DamConsultants\Bynder\Observer\ProductSaveAfter" />
     </event>
-    <!-- if you using magento versoin 2.2 and 2.3 then un-commnet this line -->
-    <!--<event name="catalog_category_save_after">
+    <event name="catalog_category_save_after">
         <observer name="catalog_megamenu" instance="DamConsultants\Bynder\Observer\CategorySaveAfter" />
-    </event>-->
+    </event>
 </config>

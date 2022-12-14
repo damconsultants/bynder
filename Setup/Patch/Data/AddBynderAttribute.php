@@ -45,6 +45,7 @@ class AddBynderAttribute implements DataPatchInterface
     public function apply()
     {
         /** @var EavSetup $eavSetup */
+        $this->moduleDataSetup->getConnection()->startSetup();
         $eavSetup = $this->eavSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
         $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_multi_img');
@@ -66,8 +67,8 @@ class AddBynderAttribute implements DataPatchInterface
             'searchable' => false,
             'filterable' => false,
             'comparable' => false,
-            'visible_on_front' => true,
-            'used_in_product_listing' => true,
+            'visible_on_front' => false,
+            'used_in_product_listing' => false,
             'unique' => false,
             'apply_to' => ''
         ]);
@@ -91,8 +92,8 @@ class AddBynderAttribute implements DataPatchInterface
             'searchable' => false,
             'filterable' => false,
             'comparable' => false,
-            'visible_on_front' => true,
-            'used_in_product_listing' => true,
+            'visible_on_front' => false,
+            'used_in_product_listing' => false,
             'apply_to' => ''
         ]);
 
@@ -115,8 +116,8 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'unique' => false,
-            'visible_on_front' => true,
-            'used_in_product_listing' => true,
+            'visible_on_front' => false,
+            'used_in_product_listing' => false,
             'apply_to' => ''
         ]);
 
@@ -141,10 +142,10 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'visible_on_front' => false,
-            'used_in_product_listing' => true,
+            'used_in_product_listing' => false,
             'unique' => false,
             'apply_to' => ''
-            /* 'attribute_set_id' => '4' */
+            
         ]);
 
         $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_image_import');
@@ -168,10 +169,10 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'visible_on_front' => false,
-            'used_in_product_listing' => true,
+            'used_in_product_listing' => false,
             'unique' => false,
             'apply_to' => ''
-            /* 'attribute_set_id' => '4' */
+            
         ]);
 
         $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'use_bynder_cdn');
@@ -195,11 +196,13 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'visible_on_front' => false,
-            'used_in_product_listing' => true,
+            'used_in_product_listing' => false,
             'unique' => false,
             'apply_to' => ''
-            /* 'attribute_set_id' => '4' */
+            
         ]);
+
+        $this->moduleDataSetup->getConnection()->endSetup();
 
     }
 
@@ -222,8 +225,5 @@ class AddBynderAttribute implements DataPatchInterface
     /**
      * {@inheritdoc}
      */
-    public static function getVersion()
-    {
-        return '2.0.1';
-    }
+   
 }

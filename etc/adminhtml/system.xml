@@ -12,23 +12,145 @@
                 <label>Bynder Credential</label>
                 <field id="bynderdomain" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Bynder Domain</label>
-                </field>
-                <field id="clientid" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Client Id</label>
-                </field>
-                <field id="secretkey" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Secret Key</label>
+                    <comment>Enter your Bynder Domain Name Here Without https://.</comment>
                 </field>
                 <field id="permanent_token" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Permanent Token</label>
+                    <comment>Enter your Bynder Permanent Token Here.(Note:- Please, given Full permission your Account.)</comment>
                 </field>
 				<field id="licenses_key" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>License Key</label>
+                    <comment>Enter your License Key Here.</comment>
                 </field>
                 <field id="bt_id" translate="label" type="button" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                     <frontend_model>DamConsultants\Bynder\Block\System\Config\Button</frontend_model>
                 </field>
             </group>
         </section>
+        <section id="byndersyncdata" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Sync. Bynder Data</label>
+            <tab>bynder_tab</tab>
+            <resource>DamConsultants_Bynder::config</resource>
+            <group id="bynder_sync_data" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Sync. Bynder Data</label>
+                <field id="select" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Select Attribute</label>        
+                    <source_model>DamConsultants\Bynder\Model\Config\Source\Select</source_model>
+                    <comment>Select the Attribute which Data you want to Sync.</comment>
+                </field>
+                <field id="sku" translate="label" type="textarea" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Product Sku</label>
+                    <comment>Enter Sku code with comma separated.(Ex. 24-MB01,25-MB02,26-MB03).</comment>
+                </field>
+                <field id="bt_id_2" translate="label" type="button" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="2">
+                    <frontend_model>DamConsultants\Bynder\Block\System\Config\GetSyncButton</frontend_model>
+                </field>
+                <field id="bt_id_1" translate="label" type="button" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="3">
+                    <frontend_model>DamConsultants\Bynder\Block\System\Config\SyncButton</frontend_model>
+                </field>
+            </group>
+        </section>
+        <!--<section id="byndersyncdatawithout" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Sync. Bynder Data Without Attribute</label>
+            <tab>bynder_tab</tab>
+            <resource>DamConsultants_Bynder::config</resource>
+            <group id="bynder_sync_data_without_select" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Sync. Bynder Data Without Select Attribute</label>
+                <field id="sku_1" translate="label" type="textarea" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Product Sku</label>
+                    <comment>Enter Sku code with comma separated.(Ex. 24-MB01,25-MB02,26-MB03)</comment>
+                </field>
+                <field id="bt_id_3" translate="label" type="button" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="2">
+                    <frontend_model>DamConsultants\Bynder\Block\System\Config\GetSyncButtonwithoutattribute</frontend_model>
+                </field>
+                <field id="bt_id_4" translate="label" type="button" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="3">
+                    <frontend_model>DamConsultants\Bynder\Block\System\Config\SyncButtonwithoutattribute</frontend_model>
+                </field>
+            </group>
+        </section>-->
+        <section id="byndeimageconfig" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Image Configuration</label>
+            <tab>bynder_tab</tab>
+            <resource>DamConsultants_Bynder::config</resource>
+            <group id="bynder_image" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Image Configuration</label>
+                <field id="selectimage" translate="label" type="radios" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Select Image Configuration</label>        
+                    <source_model>DamConsultants\Bynder\Model\Config\Source\Radio</source_model>
+                    <comment>Select The Image type which type of image sync. to bynder</comment>
+                </field>
+            </group>
+        </section>
+        <section id="cronimageconfig" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Cron Config</label>
+            <tab>bynder_tab</tab>
+            <resource>DamConsultants_Bynder::config</resource>
+            <group id="configurable_cron" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Featch Null SKU To Magento</label>
+                <field id="frequency" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Frequency</label>
+                    <source_model>DamConsultants\Bynder\Model\Config\Source\Frequency</source_model>
+                    <backend_model>DamConsultants\Bynder\Model\Config\CronConfig</backend_model>
+                    <comment>Select The Cron Frequency.</comment>
+                </field>
+                <field id="time" translate="label comment" sortOrder="2" type="time" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start Time</label>
+                    <comment>Select The Cron Start Time.</comment>
+                </field>
+            </group>
+            <group id="delete_bynder_data" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Remove Sku Form Bynder Side</label>
+                <field id="frequency" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Frequency</label>
+                    <source_model>DamConsultants\Bynder\Model\Config\Source\Frequency</source_model>
+                    <backend_model>DamConsultants\Bynder\Model\Config\RemoveSkuCronConfig</backend_model>
+                    <comment>Select The Cron Frequency.</comment>
+                </field>
+                <field id="time" translate="label comment" sortOrder="2" type="time" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start Time</label>
+                    <comment>Select The Cron Start Time.</comment>
+                </field>
+            </group>
+            <group id="auto_add_bynder" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Auto Add Data Product</label>
+                <field id="frequency" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Frequency</label>
+                    <source_model>DamConsultants\Bynder\Model\Config\Source\Frequency</source_model>
+                    <backend_model>DamConsultants\Bynder\Model\Config\AutoSkuCronConfig</backend_model>
+                    <comment>Select The Cron Frequency.</comment>
+                </field>
+                <field id="time" translate="label comment" sortOrder="2" type="time" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start Time</label>
+                    <comment>Select The Cron Start Time.</comment>
+                </field>
+            </group>
+            <group id="auto_replace_bynder" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <label>Auto Replace Data Product</label>
+                <field id="frequency" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Frequency</label>
+                    <source_model>DamConsultants\Bynder\Model\Config\Source\Frequency</source_model>
+                    <backend_model>DamConsultants\Bynder\Model\Config\AutoReplaceSkuCronConfig</backend_model>
+                    <comment>Select The Cron Frequency.</comment>
+                </field>
+                <field id="time" translate="label comment" sortOrder="2" type="time" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start Time</label>
+                    <comment>Select The Cron Start Time.</comment>
+                </field>
+            </group>
+           
+                <group id="compactview_sku_cron" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Add Compactview Sku From Bynder</label>
+                    <field id="frequency" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Frequency</label>
+                        <source_model>DamConsultants\Bynder\Model\Config\Source\Frequency</source_model>
+                        <backend_model>DamConsultants\Bynder\Model\Config\CompactviewSkuCronConfig</backend_model>
+                    </field>
+                    <field id="time" translate="label comment" sortOrder="2" type="time" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Start Time</label>
+                    </field>
+                </group>
+            
+        </section>
+        
     </system>
 </config>

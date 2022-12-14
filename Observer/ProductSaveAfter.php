@@ -24,6 +24,7 @@ class ProductSaveAfter implements ObserverInterface
         ProductRepositoryInterface $productRepository,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Catalog\Model\Product $productModel,
+        \DamConsultants\Bynder\Model\BynderSycDataFactory $byndersycData,
         \DamConsultants\Bynder\Helper\Data $bynder_helper_data
     ) {
         $this->cookieManager = $cookieManager;
@@ -34,6 +35,7 @@ class ProductSaveAfter implements ObserverInterface
         $this->productRepository = $productRepository;
         $this->logger = $logger;
         $this->b_helper = $bynder_helper_data;
+        $this->_byndersycData = $byndersycData;
         $this->_storeManager = $storeManager;
     }
 
@@ -45,11 +47,13 @@ class ProductSaveAfter implements ObserverInterface
         $bynder_multi_img = $product->getData('bynder_multi_img');
         $bynder_document = $product->getData('bynder_document');
         $bynder_videos = $product->getData('bynder_videos');
+        $product_sku_key = $product->getData('sku');
 
         $base_url = $this->_storeManager->getStore()->getBaseUrl();
         $product_url_key = $product->getUrlKey();
         $product_url = $base_url . $product_url_key . '.html';
         $fcookie = $this->cookieManager->getCookie('fcookie');
+        $model = $this->_byndersycData->create();
         try {
             if (isset($fcookie) && !empty($fcookie)) {
                 $db_id = $fcookie;
@@ -59,7 +63,7 @@ class ProductSaveAfter implements ObserverInterface
 
                 if ($result && is_array($result) == 1 && isset($result["images_json"]) && !empty($result["images_json"])) {
                     $url_data = [];
-                    $data = trim((string)$bynder_multi_img);
+                    $data = trim($bynder_multi_img);
                     if (!empty($data)) {
                         $ex = explode("\n", $data);
                         $ex = array_filter($ex);
@@ -72,8 +76,24 @@ class ProductSaveAfter implements ObserverInterface
                     $cookie_array = array_filter($cookie_array);
                     foreach ($cookie_array as $item) {
                         if (!in_array($item, $url_data)) {
-                            $bynder_multi_img .= "\n" . $item;
+                            $bynder_multi_img .=  $item . " \n";
                             array_push($url_data, $item);
+                        }
+                        $url_explode = explode("https://", $item);
+                        $url_filter = array_filter($url_explode);
+                        foreach ($url_filter as $media_value) {
+                            $media_explode = explode("/", $media_value);
+                            $data_value_1 = array(
+                                'sku' => $product_sku_key,
+                                'bynder_data' => $item,
+                                'bynder_data_type' => '1',
+                                'media_id' => $media_explode[3],
+                                'remove_for_magento' => '1',
+                                'added_on_cron_compactview' => '2',
+                                'added_date' => time()
+                            );
+                            $model->setData($data_value_1);
+                            $model->save();
                         }
                     }
                     $api_call = $this->b_helper->check_bynder();
@@ -86,7 +106,7 @@ class ProductSaveAfter implements ObserverInterface
                 }
                 if ($result && is_array($result) == 1 && isset($result["doc_json"]) && !empty($result["doc_json"])) {
                     $url_data = [];
-                    $data = trim((string)$bynder_document);
+                    $data = trim($bynder_document);
                     if (!empty($data)) {
                         $ex = explode("\n", $data);
                         $ex = array_filter($ex);
@@ -99,8 +119,24 @@ class ProductSaveAfter implements ObserverInterface
                     $doc_array = array_filter($doc_array);
                     foreach ($doc_array as $item) {
                         if (!in_array($item, $url_data)) {
-                            $bynder_document .= "\n" . $item . "\n";
+                            $bynder_document .= $item . " \n";
                             array_push($url_data, $item);
+                        }
+                        $url_doc_explode = explode("https://", $item);
+                        $url_doc_filter = array_filter($url_doc_explode);
+                        foreach ($url_doc_filter as $media_doc_value) {
+                            $media_doc_explode = explode("/", $media_doc_value);
+                            $data_doc_value = array(
+                                'sku' => $product_sku_key,
+                                'bynder_data' => $item,
+                                'bynder_data_type' => '2',
+                                'media_id' => $media_doc_explode[3],
+                                'remove_for_magento' => '1',
+                                'added_on_cron_compactview' => '2',
+                                'added_date' => time()
+                            );
+                           $model->setData($data_doc_value);
+                           $model->save();
                         }
                     }
                     $api_call = $this->b_helper->check_bynder();
@@ -113,7 +149,7 @@ class ProductSaveAfter implements ObserverInterface
                 }
                 if ($result && is_array($result) == 1 && isset($result["video_url"]) && !empty($result["video_url"])) {
                     $url_data = [];
-                    $data = trim((string)$bynder_videos);
+                    $data = trim($bynder_videos);
                     if (!empty($data)) {
                         $ex = explode("\n", $data);
                         $ex = array_filter($ex);
@@ -123,11 +159,28 @@ class ProductSaveAfter implements ObserverInterface
                     }
 
                     $video_array = json_decode($result["video_url"], true);
+
                     $video_array = array_filter($video_array);
                     foreach ($video_array as $item) {
                         if (!in_array($item, $url_data)) {
-                            $bynder_videos .= "\n" . $item . "\n";
+                            $bynder_videos .= $item . " \n";
                             array_push($url_data, $item);
+                        }
+                        $url_video_explode = explode("https://", $item);
+                        $url_video_filter = array_filter($url_video_explode);
+                        foreach ($url_video_filter as $media_video_value) {
+                            $media_video_explode = explode("/", $media_video_value);
+                            $data_video_data = array(
+                                'sku' => $product_sku_key,
+                                'bynder_data' => $item,
+                                'bynder_data_type' => '3',
+                                'media_id' => $media_video_explode[3],
+                                'remove_for_magento' => '1',
+                                'added_on_cron_compactview' => '2',
+                                'added_date' => time()
+                            );
+                           $model->setData($data_video_data);
+                           $model->save();
                         }
                     }
                     $api_call = $this->b_helper->check_bynder();
@@ -139,32 +192,6 @@ class ProductSaveAfter implements ObserverInterface
                     }
                 }
             }
-            
-            $arr = array(
-                $product->getShortDescription()
-            );
-
-            $url_data = [];
-
-            $str = implode(" ", $arr);
-            $image_arr = explode(" ", $str);
-            foreach ($image_arr as $a) {
-                preg_match('@src="([^"]+)"@', $a, $match);
-                $src = array_pop($match);
-                $img_arr = explode('?', (string)$src);
-                $url_data[] = $img_arr[0];
-            }
-
-            if (!empty($url_data)) {
-                $getShortDescription = array_filter($url_data);
-
-                $api_call = $this->b_helper->check_bynder();
-                $api_response = json_decode($api_call, true);
-                if (isset($api_response['status']) == 1) {
-                    $assets = $this->b_helper->bynder_data_cms_page($product_url, $getShortDescription);
-                }
-            }
-            
             if ($bynder_image_import == 1) {
                 $img_dir = BP . '/pub/media/temp/';
                 if (isset($fcookie) && !empty($fcookie)) {
@@ -187,8 +214,7 @@ class ProductSaveAfter implements ObserverInterface
                         $this->b_helper->unsetcookie();
                         $this->rrmdir($img_dir);
                         $this->removedb($db_id);
-                        /*return $this->getResponse()->setBody(true);*/
-                        return true;
+                        return $this->getResponse()->setBody(true);
                     }
                     if (!empty($bynder)) {
 
