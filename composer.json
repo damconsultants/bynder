@@ -24,8 +24,9 @@
     },
     "repositories": [
     {
-        "type": "vcs",
-        "url": "https://github.com/damconsultants/bynder.git"
+        "type": "composer",
+        "url": "https://github.com/damconsultants/bynder.git",
+        "canonical": false
     }
 ]
     
