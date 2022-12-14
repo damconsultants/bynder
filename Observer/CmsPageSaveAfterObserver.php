@@ -33,7 +33,7 @@ class CmsPageSaveAfterObserver implements ObserverInterface
       foreach ($image_arr as $a) {
          preg_match('@src="([^"]+)"@', $a, $match);
          $src = array_pop($match);
-         $img_arr = explode('?', $src);
+         $img_arr = explode('?',(string)$src);
          $url_data[] = $img_arr[0];
       }
 
