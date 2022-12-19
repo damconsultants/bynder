@@ -130,7 +130,7 @@ class ProductSaveAfter implements ObserverInterface
                                 'sku' => $product_sku_key,
                                 'bynder_data' => $item,
                                 'bynder_data_type' => '2',
-                                'media_id' => $media_doc_explode[3],
+                                'media_id' => $media_doc_explode[2],
                                 'remove_for_magento' => '1',
                                 'added_on_cron_compactview' => '2',
                                 'added_date' => time()
@@ -174,7 +174,7 @@ class ProductSaveAfter implements ObserverInterface
                                 'sku' => $product_sku_key,
                                 'bynder_data' => $item,
                                 'bynder_data_type' => '3',
-                                'media_id' => $media_video_explode[3],
+                                'media_id' => $media_video_explode[2],
                                 'remove_for_magento' => '1',
                                 'added_on_cron_compactview' => '2',
                                 'added_date' => time()
