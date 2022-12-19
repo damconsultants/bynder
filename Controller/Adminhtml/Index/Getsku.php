@@ -46,6 +46,7 @@ class Getsku extends \Magento\Backend\App\Action
             return;
         }
         $attribute_value = $this->getRequest()->getParam('select_attribute');
+        $sku_limit = $this->getRequest()->getParam('sku_limit');
         $product_sku = [];
         $sku = [];
         $id = [];
@@ -56,7 +57,10 @@ class Getsku extends \Magento\Backend\App\Action
             ->addAttributeToSelect('*')
             /*->addAttributeToFilter('visibility', \Magento\Catalog\Model\Product\Visibility::VISIBILITY_BOTH)*/
             ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
-        $productcollection->getSelect()->limit(50);
+        if ($sku_limit != 0) {
+            $productcollection->getSelect()->limit($sku_limit);
+        }
+
         foreach ($attribute as $value) {
             $id[] = $value['attribute_set_id'];
         }
