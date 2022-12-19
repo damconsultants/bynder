@@ -16,16 +16,15 @@ class Data extends AbstractHelper
     protected $filesystem;
     protected $_scopeConfig;
     public $by_redirecturl;
-    /*public $clientId = "";
-    public $clientSecret = "";*/
+    
     public $bynderDomain = "";
     public $permanent_token = "";
-    /*const CLIENT_ID = 'bynderconfig/bynder_credential/clientid';
-    const SECRET_KEY = 'bynderconfig/bynder_credential/secretkey';*/
+    
     const BYNDER_DOMAIN = 'bynderconfig/bynder_credential/bynderdomain';
     const PERMANENT_TOKEN = 'bynderconfig/bynder_credential/permanent_token';
     const LICENCE_TOKEN = 'bynderconfig/bynder_credential/licenses_key';
     const RADIO_BUTTON = 'byndeimageconfig/bynder_image/selectimage';
+    const PRODUCT_SKU_LIMIT = 'cronimageconfig/set_limit_product_sku/product_sku_limt';
     const API_CALLED = 'https://trello.thedamconsultants.com/';
 
     public function __construct(
@@ -120,14 +119,7 @@ class Data extends AbstractHelper
     {
         return $this->_scopeConfig->getValue($storePath, ScopeInterface::SCOPE_STORE, $storeId);
     }
-    /*public function getClientId()
-    {
-        return (string) $this->getStoreConfig(self::CLIENT_ID);
-    }
-    public function getSecretKey()
-    {
-        return (string) $this->getStoreConfig(self::SECRET_KEY);
-    }*/
+   
     public function getBynderDomain()
     {
         return (string) $this->getStoreConfig(self::BYNDER_DOMAIN);
@@ -147,14 +139,12 @@ class Data extends AbstractHelper
         return (string) $this->getStoreConfig(self::RADIO_BUTTON);
     }
 
-    /*public function ClientId()
+    public function getProductSkuLimitConfig()
     {
-        return (string) $this->getConfig(self::CLIENT_ID);
+        return (string) $this->getStoreConfig(self::PRODUCT_SKU_LIMIT);
     }
-    public function SecretKey()
-    {
-        return (string) $this->getConfig(self::SECRET_KEY);
-    }*/
+
+    
     public function BynderDomain()
     {
         return (string) $this->getConfig(self::BYNDER_DOMAIN);
@@ -166,12 +156,11 @@ class Data extends AbstractHelper
 
     public function getLoadCredential()
     {
-        /*$this->clientId = $this->ClientId();
-        $this->clientSecret = $this->SecretKey();*/
+        
         $this->bynderDomain = $this->BynderDomain();
         $this->permanent_token = $this->PermanentToken();
         $this->by_redirecturl = $this->redirecturl();
-        if (/*!empty($this->clientId) && !empty($this->clientSecret) && */!empty($this->bynderDomain) && !empty($this->permanent_token) && !empty($this->by_redirecturl)) {
+        if (!empty($this->bynderDomain) && !empty($this->permanent_token) && !empty($this->by_redirecturl)) {
             return 1;
         } else {
             return "Bynder authentication failed | Please check your credential";
@@ -224,8 +213,7 @@ class Data extends AbstractHelper
     {
 
         $fields = array(
-            /*'client_id' => $bynder_auth['clientId'],
-            'client_secret' => $bynder_auth['clientSecret'],*/
+            
             'bynder_domain' => $bynder_auth['bynderDomain'],
             'redirectUri' => $bynder_auth['redirectUri'],
             'permanent_token' => $bynder_auth['token'],
@@ -322,8 +310,6 @@ class Data extends AbstractHelper
 
         $fields = array(
             'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
-            /*'client_id' => $this->ClientId(),
-            'client_secret' => $this->SecretKey(),*/
             'bynder_domain' => $this->BynderDomain(),
             'permanent_token' => $this->PermanentToken(),
             'licence_token' => $this->getLicenceToken(),
@@ -388,8 +374,6 @@ class Data extends AbstractHelper
 
         $fields = array(
             'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
-            /*'client_id' => $this->ClientId(),
-            'client_secret' => $this->SecretKey(),*/
             'bynder_domain' => $this->BynderDomain(),
             'permanent_token' => $this->PermanentToken(),
             'licence_token' => $this->getLicenceToken(),
@@ -428,7 +412,7 @@ class Data extends AbstractHelper
             'bynder_multi_img' => $url_data
         );
 
-        //echo "<pre>";print_r($fields);die;
+       
 
         $fields = json_encode($fields);
 
