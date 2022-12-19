@@ -103,9 +103,19 @@ class Psku extends \Magento\Backend\App\Action
                                     }
                                 } else {
 
-                                    array_push($data_arr, $data_sku[0]);
-                                    $data_p = array("sku" => $data_sku[0], "url" => $image_data["image_link"]);
-                                    array_push($data_val_arr, $data_p);
+                                    if($select_attribute == 'video'){
+                                        $video_link =  $image_data["image_link"].'@@'.$image_data["webimage"];
+                                        array_push($data_arr, $data_sku[0]);
+                                        $data_p = array("sku" => $data_sku[0], "url" => $video_link);
+                                        array_push($data_val_arr, $data_p);
+                                    }else{
+                                        $doc_name = $data_value["name"];
+                                        $doc_name_with_space = preg_replace("/[^a-zA-Z]+/", "-", $doc_name);
+                                        $doc_link =  $image_data["image_link"] . '@@' . $doc_name_with_space;
+                                        array_push($data_arr, $data_sku[0]);
+                                        $data_p = array("sku" => $data_sku[0], "url" => $doc_link);
+                                        array_push($data_val_arr, $data_p);
+                                    }
                                 }
                             }
                         }
@@ -245,7 +255,7 @@ class Psku extends \Magento\Backend\App\Action
 
                     $video_merge = array_merge($diff_video_array, $trimmed_video_array_filter);
 
-                    $new_video_value = implode(" ", $video_merge);
+                    $new_video_value = implode(" \n", $video_merge);
 
                     $api_call = $this->datahelper->check_bynder();
                     $api_response = json_decode($api_call, true);
@@ -323,7 +333,7 @@ class Psku extends \Magento\Backend\App\Action
 
                     $doc_merge = array_merge($diff_doc_array, $trimmed_doc_array_filter);
 
-                    $new_doc_value = implode(" ", $doc_merge);
+                    $new_doc_value = implode(" \n", $doc_merge);
 
                     $api_call = $this->datahelper->check_bynder();
                     $api_response = json_decode($api_call, true);
