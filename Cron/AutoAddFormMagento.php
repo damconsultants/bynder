@@ -58,7 +58,16 @@ class AutoAddFormMagento
             /*->addAttributeToFilter('type_id', \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE)*/
             ->addAttributeToFilter('visibility', \Magento\Catalog\Model\Product\Visibility::VISIBILITY_BOTH)
             ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
-        $productColl->getSelect()->limit(50);
+
+        /*$productColl->getSelect()->limit(50);*/
+
+        $product_sku_limit = $this->datahelper->getProductSkuLimitConfig();
+        if (!empty($product_sku_limit)) {
+            $productColl->getSelect()->limit($product_sku_limit);
+        } else {
+            $productColl->getSelect()->limit(50);
+        }
+
         $bynder = [];
         $bynder_attribute = array('bynder_multi_img', 'bynder_videos', 'bynder_document');
 
@@ -102,9 +111,23 @@ class AutoAddFormMagento
                                             }
                                         }
                                     } else {
-                                        array_push($data_arr, $data_sku[0]);
-                                        $data_p = array("sku" => $data_sku[0], "url" => $image_data["image_link"], "type" => $data_value['type']);
-                                        array_push($data_val_arr, $data_p);
+                                        if ($data_value['type'] == 'video') {
+
+                                            $video_link =  $image_data["image_link"] . '@@' . $image_data["webimage"];
+                                            array_push($data_arr, $data_sku[0]);
+                                            $data_p = array("sku" => $data_sku[0], "url" => $video_link, "type" => $data_value['type']);
+                                            array_push($data_val_arr, $data_p);
+
+                                        }else{
+
+                                            $doc_name = $data_value["name"];
+                                            $doc_name_with_space = preg_replace("/[^a-zA-Z]+/", "-", $doc_name);
+                                            $doc_link =  $image_data["image_link"] . '@@' . $doc_name_with_space;
+                                            array_push($data_arr, $data_sku[0]);
+                                            $data_p = array("sku" => $data_sku[0], "url" => $doc_link, "type" => $data_value['type']);
+                                            array_push($data_val_arr, $data_p);
+                                        }
+
                                     }
                                 }
                             } else {
@@ -114,7 +137,7 @@ class AutoAddFormMagento
                     }
                 }
                 $this->_logger->info("Start Data Arr");
-                
+
                 if (count($data_arr) > 0) {
                     foreach ($data_arr as $key => $temp) {
                         $temp_arr[$temp][$data_val_arr[$key]["type"]]["url"][] = $data_val_arr[$key]["url"];
@@ -262,8 +285,8 @@ class AutoAddFormMagento
 
                     $diff_doc_array = array_diff($trimmed_new_doc_array, $trimmed_doc_array_filter);
                     $doc_array_merge = array_merge($diff_doc_array, $trimmed_doc_array_filter);
-                    $merge_new_doc_value = implode(" ", $doc_array_merge);
-                    
+                    $merge_new_doc_value = implode(" \n", $doc_array_merge);
+
                     $api_call = $this->datahelper->check_bynder();
                     $api_response = json_decode($api_call, true);
                     if (isset($api_response['status']) == 1) {
@@ -352,7 +375,7 @@ class AutoAddFormMagento
                     $trimmed_new_video_array = array_map('trim', $new_video_array);
                     $diff_video_array = array_diff($trimmed_new_video_array, $trimmed_video_array_filter);
                     $video_array_merge = array_merge($diff_video_array, $trimmed_video_array_filter);
-                    $merge_new_video_value = implode(" ", $video_array_merge);
+                    $merge_new_video_value = implode(" \n", $video_array_merge);
 
                     $api_call = $this->datahelper->check_bynder();
                     $api_response = json_decode($api_call, true);

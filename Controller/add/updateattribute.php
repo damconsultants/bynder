@@ -57,9 +57,9 @@ class UpdateAttribute extends \Magento\Framework\App\Action\Action
         $data = ['images_json' => $img_json];
         $model->setData($data);
         if ($model->save()) {
-            echo "<pre>";print_r("IN");die;
+           return true;
         }else{
-            echo "<pre>";print_r("Out");die;
+            return false;
         }
 
 

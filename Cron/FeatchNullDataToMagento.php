@@ -59,7 +59,14 @@ class FeatchNullDataToMagento
                 )
             )
             ->load();
-        $product_collection->getSelect()->limit(50);
+
+        $product_sku_limit = $this->datahelper->getProductSkuLimitConfig();
+        if (!empty($product_sku_limit)) {
+            $product_collection->getSelect()->limit($product_sku_limit);
+        } else {
+            $product_collection->getSelect()->limit(50);
+        }
+
         $collection = $this->metaPropertyCollectionFactory->create()->getData()[0]['property_id'];
         $byndeimageconfig = $this->datahelper->byndeimageconfig();
         $data_arr = array();
@@ -100,9 +107,19 @@ class FeatchNullDataToMagento
                                         }
                                     }
                                 } else {
-                                    array_push($data_arr, $data_sku[0]);
-                                    $data_p = array("sku" => $data_sku[0], "url" => $image_data["image_link"], "type" => $data_value['type']);
-                                    array_push($data_val_arr, $data_p);
+                                    if ($data_value['type'] == 'video') {
+                                        $video_link =  $image_data["image_link"] . '@@' . $image_data["webimage"];
+                                        array_push($data_arr, $data_sku[0]);
+                                        $data_p = array("sku" => $data_sku[0], "url" => $video_link, "type" => $data_value['type']);
+                                        array_push($data_val_arr, $data_p);
+                                    } else {
+                                        $doc_name = $data_value["name"];
+                                        $doc_name_with_space = preg_replace("/[^a-zA-Z]+/", "-", $doc_name);
+                                        $doc_link =  $image_data["image_link"] . '@@' . $doc_name_with_space;
+                                        array_push($data_arr, $data_sku[0]);
+                                        $data_p = array("sku" => $data_sku[0], "url" => $doc_link, "type" => $data_value['type']);
+                                        array_push($data_val_arr, $data_p);
+                                    }
                                 }
                             }
                         } else {
@@ -175,7 +192,7 @@ class FeatchNullDataToMagento
                     }
 
                     $updateAttributes['bynder_multi_img'] = $new_image_value . " \n";
-                    
+
                     $this->action->updateAttributes([$product_ids], $updateAttributes, $storeId);
 
                     foreach ($new_image_array as $value) {
@@ -203,7 +220,7 @@ class FeatchNullDataToMagento
                     $new_doc_array = explode(" \n", $img_json);
                     $trimmed_new_doc_array = array_map('trim', $new_doc_array);
 
-                    $new_doc_value = implode(" ", $trimmed_new_doc_array);
+                    $new_doc_value = implode(" \n", $trimmed_new_doc_array);
 
                     $api_call = $this->datahelper->check_bynder();
                     $api_response = json_decode($api_call, true);
@@ -243,7 +260,7 @@ class FeatchNullDataToMagento
                 if (empty($video_value)) {
                     $new_video_array = explode(" \n", $img_json);
                     $trimmed_new_video_array = array_map('trim', $new_video_array);
-                    $new_video_value = implode(" ", $trimmed_new_video_array);
+                    $new_video_value = implode(" \n", $trimmed_new_video_array);
 
                     $api_call = $this->datahelper->check_bynder();
                     $api_response = json_decode($api_call, true);

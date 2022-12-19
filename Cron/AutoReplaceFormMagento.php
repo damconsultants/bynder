@@ -58,7 +58,15 @@ class AutoReplaceFormMagento
             ->addAttributeToFilter('type_id', \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE)
             ->addAttributeToFilter('visibility', \Magento\Catalog\Model\Product\Visibility::VISIBILITY_BOTH)
             ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
-        $productColl->getSelect()->limit(50);
+
+        /*$productColl->getSelect()->limit(50);*/
+        $product_sku_limit = $this->datahelper->getProductSkuLimitConfig();
+        if (!empty($product_sku_limit)) {
+            $productColl->getSelect()->limit($product_sku_limit);
+        } else {
+            $productColl->getSelect()->limit(50);
+        }
+
         $bynder = [];
         $bynder_attribute = array('bynder_multi_img', 'bynder_videos', 'bynder_document');
 
@@ -103,9 +111,19 @@ class AutoReplaceFormMagento
                                             }
                                         }
                                     } else {
-                                        array_push($data_arr, $data_sku[0]);
-                                        $data_p = array("sku" => $data_sku[0], "url" => $image_data["image_link"], "type" => $data_value['type']);
-                                        array_push($data_val_arr, $data_p);
+                                        if ($data_value['type'] == 'video') {
+                                            $video_link =  $image_data["image_link"] . '@@' . $image_data["webimage"];
+                                            array_push($data_arr, $data_sku[0]);
+                                            $data_p = array("sku" => $data_sku[0], "url" => $video_link, "type" => $data_value['type']);
+                                            array_push($data_val_arr, $data_p);
+                                        } else {
+                                            $doc_name = $data_value["name"];
+                                            $doc_name_with_space = preg_replace("/[^a-zA-Z]+/", "-", $doc_name);
+                                            $doc_link =  $image_data["image_link"] . '@@' . $doc_name_with_space;
+                                            array_push($data_arr, $data_sku[0]);
+                                            $data_p = array("sku" => $data_sku[0], "url" => $doc_link, "type" => $data_value['type']);
+                                            array_push($data_val_arr, $data_p);
+                                        }
                                     }
                                 }
                             } else {
@@ -272,10 +290,17 @@ class AutoReplaceFormMagento
                     $pervious_bynder_doc[] = $data_collection_value['bynder_data'];
                     if (in_array($data_collection_value['bynder_data'], $doc_array_merge)) {
                         unset($doc_array_merge[array_search($data_collection_value['bynder_data'], $doc_array_merge)]);
+                        $update_doc_data_value1 = array(
+                            'sku' => $product_sku_key,
+                            'remove_for_magento' => '2',
+                            'added_date' => time()
+                        );
+                        $where = ['bynder_data=?' => $data_collection_value['bynder_data']];
+                        $this->_resource->update($table_Name, $update_doc_data_value1, $where);
                     }
                 }
 
-                $merge_new_doc_value = implode(" ", $doc_array_merge);
+                $merge_new_doc_value = implode(" \n", $doc_array_merge);
 
                 $updateAttributes['bynder_document'] = $merge_new_doc_value . " \n";
                 $this->action->updateAttributes([$product_ids], $updateAttributes, $storeId);
@@ -283,10 +308,10 @@ class AutoReplaceFormMagento
                 $diff_doc_new_value = array_diff($new_doc_array, $pervious_bynder_doc);
 
                 $api_call = $this->datahelper->check_bynder();
-                    $api_response = json_decode($api_call, true);
-                    if (isset($api_response['status']) == 1) {
-                        $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $diff_doc_new_value);
-                    }
+                $api_response = json_decode($api_call, true);
+                if (isset($api_response['status']) == 1) {
+                    $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $diff_doc_new_value);
+                }
 
 
                 foreach ($new_doc_media_id as $doc_bynder_media_id) {
@@ -361,10 +386,17 @@ class AutoReplaceFormMagento
                     $pervious_bynder_video[] = $data_collection_value['bynder_data'];
                     if (in_array($data_collection_value['bynder_data'], $video_array_merge)) {
                         unset($video_array_merge[array_search($data_collection_value['bynder_data'], $video_array_merge)]);
+                        $update_video_data_value = array(
+                            'sku' => $product_sku_key,
+                            'remove_for_magento' => '2',
+                            'added_date' => time()
+                        );
+                        $where = ['bynder_data=?' => $data_collection_value['bynder_data']];
+                        $this->_resource->update($table_Name, $update_video_data_value, $where);
                     }
                 }
 
-                $merge_new_video_value = implode(" ", $video_array_merge);
+                $merge_new_video_value = implode(" \n", $video_array_merge);
 
                 $updateAttributes['bynder_videos'] = $merge_new_video_value . " \n";
                 $this->action->updateAttributes([$product_ids], $updateAttributes, $storeId);
@@ -372,10 +404,10 @@ class AutoReplaceFormMagento
                 $diff_video_new_value = array_diff($new_video_array, $pervious_bynder_video);
 
                 $api_call = $this->datahelper->check_bynder();
-                    $api_response = json_decode($api_call, true);
-                    if (isset($api_response['status']) == 1) {
-                        $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $diff_video_new_value);
-                    }
+                $api_response = json_decode($api_call, true);
+                if (isset($api_response['status']) == 1) {
+                    $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $diff_video_new_value);
+                }
 
                 foreach ($new_video_media_id as $video_bynder_media_id) {
                     if (in_array($video_bynder_media_id, $old_video_media_array)) {
