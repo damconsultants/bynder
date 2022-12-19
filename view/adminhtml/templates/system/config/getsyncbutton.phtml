@@ -7,13 +7,33 @@
         'prototype'
     ], function($) {
 
+        var checkbox_checked = 0;
+        var sku_limit = 0;
+        $('input[type="checkbox"]').change(function() {
+            if ($(this).is(':checked')) {
+                $("#row_byndersyncdata_bynder_sync_data_sku_limit").hide();
+                checkbox_checked = 1;
+            }else{
+                $("#row_byndersyncdata_bynder_sync_data_sku_limit").show();
+                checkbox_checked = 0;
+            }
+            
+        });
+
+
         $('#bt_id_2').click(function() {
             var product_sku = $('textarea#byndersyncdata_bynder_sync_data_sku').val();
             var select_attribute = $('select#byndersyncdata_bynder_sync_data_select').val();
+            if(checkbox_checked == 0){
+                sku_limit = $('#byndersyncdata_bynder_sync_data_sku_limit').val();
+            }else{
+                sku_limit = 0;
+            }
             console.log(select_attribute);
             var params = {
                 product_sku: product_sku,
-                select_attribute: select_attribute
+                select_attribute: select_attribute,
+                sku_limit:sku_limit
             };
             new Ajax.Request('<?php echo $block->getAjaxUrl() ?>', {
                 parameters: params,
