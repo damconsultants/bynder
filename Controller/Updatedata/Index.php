@@ -134,7 +134,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     $data = trim($bynder_document);
                     $url_data = array();
                     if (!empty($data)) {
-                        $ex = explode(" ", $data);
+                        $ex = explode(" \n", $data);
                         $ex = array_filter($ex);
                         foreach ($ex as $v) {
                             array_push($url_data, $v);
@@ -144,7 +144,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     $request_document = $up_document;
                     $request_document_url_data = array();
                     if (!empty($request_document)) {
-                        $ex_document = explode(" ", $request_document);
+                        $ex_document = explode(" \n", $request_document);
                         $ex_document = array_filter($ex_document);
                         foreach ($ex_document as $v) {
                             array_push($request_document_url_data, $v);
@@ -177,7 +177,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     $data = trim($bynder_videos);
                     $url_data = array();
                     if (!empty($data)) {
-                        $ex = explode(" ", $data);
+                        $ex = explode(" \n", $data);
                         $ex = array_filter($ex);
                         foreach ($ex as $v) {
                             array_push($url_data, $v);
@@ -187,7 +187,7 @@ class Index extends \Magento\Framework\App\Action\Action
                     $request_video = $up_videos;
                     $request_video_url_data = array();
                     if (!empty($request_video)) {
-                        $ex_video = explode(" ", $request_video);
+                        $ex_video = explode(" \n", $request_video);
                         $ex_video = array_filter($ex_video);
                         foreach ($ex_video as $v) {
                             array_push($request_video_url_data, $v);
