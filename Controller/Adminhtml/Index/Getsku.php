@@ -1,28 +1,21 @@
 <?php
 
-/**
- * the dam consultants Software.
- *
- * @category  the dam consultants
- * @package   DamConsultants_Bynder
- * @author    the dam consultants
- */
-
 namespace DamConsultants\Bynder\Controller\Adminhtml\Index;
 
-/**
- * Class Gsku
- * @package DamConsultants\Bynder\Controller\Index
- */
 class Getsku extends \Magento\Backend\App\Action
 {
-
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
     protected $resultPageFactory = false;
 
     /**
-     * Edit constructor.
+     * Get Sku.
      * @param \Magento\Backend\App\Action\Context $context
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute
+     * @param \Magento\Framework\Controller\Result\JsonFactory $jsonFactory
+     * @param \Magento\Catalog\Api\ProductAttributeManagementInterface $productAttributeManagementInterface
+     * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
@@ -37,7 +30,11 @@ class Getsku extends \Magento\Backend\App\Action
         $this->resultJsonFactory = $jsonFactory;
         $this->productAttributeManagementInterface = $productAttributeManagementInterface;
     }
-
+    /**
+     * Execute
+     *
+     * @return $this
+     */
     public function execute()
     {
 
@@ -47,20 +44,18 @@ class Getsku extends \Magento\Backend\App\Action
         }
         $attribute_value = $this->getRequest()->getParam('select_attribute');
         $sku_limit = $this->getRequest()->getParam('sku_limit');
+
         $product_sku = [];
         $sku = [];
         $id = [];
-        $data = [];
-        $res_array = array();
         $attribute = $this->collectionFactory->create();
         $productcollection = $this->collectionFactory->create()
             ->addAttributeToSelect('*')
-            /*->addAttributeToFilter('visibility', \Magento\Catalog\Model\Product\Visibility::VISIBILITY_BOTH)*/
             ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
+
         if ($sku_limit != 0) {
             $productcollection->getSelect()->limit($sku_limit);
         }
-
         foreach ($attribute as $value) {
             $id[] = $value['attribute_set_id'];
         }
@@ -72,47 +67,49 @@ class Getsku extends \Magento\Backend\App\Action
 
                 if ($atttr->getAttributeCode() == "bynder_multi_img") {
                     $image_id[] = $atttr->getAttributeSetId();
-                } elseif ($atttr->getAttributeCode() == "bynder_videos") {
-
-                    $video_id[] = $atttr->getAttributeSetId();
                 } elseif ($atttr->getAttributeCode() == "bynder_document") {
 
                     $doc_id[] = $atttr->getAttributeSetId();
                 }
             }
         }
-        $array_merge = array_merge($image_id, $video_id);
-        $final = array_merge($array_merge, $doc_id);
+        /*  IMAGE & VIDEO == 1 , IMAGE == 2 , VIDEO == 3 */
+        //$array_merge = array_merge($image_id, $video_id);
+        $final = array_merge($image_id, $doc_id);
         $ids = array_unique($final);
         if (!empty($attribute_value)) {
             if ($attribute_value == "image") {
-                $productcollection->addAttributeToFilter('attribute_set_id', $image_id)
-                    ->addAttributeToFilter(
-                        array(
-                            array('attribute' => 'bynder_multi_img', 'null' => true)
-                        )
-                    );
+                $productcollection->addAttributeToFilter('attribute_set_id', $image_id);
+                
                 foreach ($productcollection as $product) {
-                    $product_sku[] = $product->getSku();
+                    if (!empty($product['bynder_multi_img'])) {
+                        if ($product['bynder_isMain'] != "2" && $product['bynder_isMain'] != "1") {
+                            $product_sku[] = $product->getSku();
+                        }
+                    } else {
+                        $product_sku[] = $product->getSku();
+                    }
                 }
             } elseif ($attribute_value == "video") {
-
-                $productcollection->addAttributeToFilter('attribute_set_id', $video_id)
-                    ->addAttributeToFilter(
-                        array(
-                            array('attribute' => 'bynder_videos', 'null' => true)
-                        )
-                    );
+                $productcollection->addAttributeToFilter('attribute_set_id', $image_id);
+                
                 foreach ($productcollection as $product) {
-                    $product_sku[] = $product->getSku();
+                    if (!empty($product['bynder_multi_img'])) {
+                        if ($product['bynder_isMain'] != "3" && $product['bynder_isMain'] != "1") {
+                            $product_sku[] = $product->getSku();
+                        }
+                    } else {
+                        $product_sku[] = $product->getSku();
+                    }
+                    
                 }
             } elseif ($attribute_value == "document") {
 
                 $productcollection->addAttributeToFilter('attribute_set_id', $doc_id)
                     ->addAttributeToFilter(
-                        array(
-                            array('attribute' => 'bynder_document', 'null' => true)
-                        )
+                        [
+                            ['attribute' => 'bynder_document', 'null' => true]
+                        ]
                     );
                 foreach ($productcollection as $product) {
                     $product_sku[] = $product->getSku();
@@ -122,11 +119,10 @@ class Getsku extends \Magento\Backend\App\Action
 
             $productcollection->addAttributeToFilter('attribute_set_id', $ids)
                 ->addAttributeToFilter(
-                    array(
-                        array('attribute' => 'bynder_multi_img', 'null' => true),
-                        array('attribute' => 'bynder_videos', 'null' => true),
-                        array('attribute' => 'bynder_document', 'null' => true)
-                    )
+                    [
+                        ['attribute' => 'bynder_multi_img', 'null' => true],
+                        ['attribute' => 'bynder_document', 'null' => true]
+                    ]
                 );
             foreach ($productcollection as $product) {
                 $product_sku[] = $product->getSku();

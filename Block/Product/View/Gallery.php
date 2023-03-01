@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DamConsultants
  *
@@ -11,6 +12,7 @@
  * @package   DamConsultants_Bynder
  *
  */
+
 namespace DamConsultants\Bynder\Block\Product\View;
 
 use Magento\Catalog\Block\Product\Context;
@@ -22,12 +24,6 @@ use Magento\Framework\Data\Collection;
 use Magento\Framework\DataObject;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Stdlib\ArrayUtils;
-
-/**
- * Class Gallery
- *
- * @package DamConsultants\Bynder\Block\Product\View
- */
 
 class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
 {
@@ -55,17 +51,30 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
      * @var UrlBuilder
      */
     private $imageUrlBuilder;
+    /**
+     * @var \Magento\Framework\App\Request\Http
+     */
     public $request;
 
+    /**
+     * Gallery
+     * @param \Magento\Framework\App\Request\Http $request
+     * @param Context $context
+     * @param ArrayUtils $arrayUtils
+     * @param \Magento\Framework\Json\EncoderInterface $jsonEncoder
+     * @param \Magento\Framework\Registry $Registry
+     * @param ImagesConfigFactoryInterface $imagesConfigFactory
+     * @param array $galleryImagesConfig
+     * @param UrlBuilder $urlBuilder
+     * @param array $data
+     */
     public function __construct(
         \Magento\Framework\App\Request\Http $request,
         Context $context,
         ArrayUtils $arrayUtils,
         \Magento\Framework\Json\EncoderInterface $jsonEncoder,
         \Magento\Framework\Registry $Registry,
-        \Magento\Theme\Block\Html\Header\Logo $logo,
         ImagesConfigFactoryInterface $imagesConfigFactory = null,
-        
         array $galleryImagesConfig = [],
         UrlBuilder $urlBuilder = null,
         array $data = []
@@ -80,9 +89,8 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
             $urlBuilder
         );
         $this->jsonEncoder = $jsonEncoder;
-        $this->_logo = $logo;
         $this->galleryImagesConfigFactory = $imagesConfigFactory ?: ObjectManager::getInstance()
-                        ->get(ImagesConfigFactoryInterface::class);
+            ->get(ImagesConfigFactoryInterface::class);
         $this->galleryImagesConfig = $galleryImagesConfig;
         $this->imageUrlBuilder = $urlBuilder ?? ObjectManager::getInstance()->get(UrlBuilder::class);
         $this->_registry = $Registry;
@@ -111,31 +119,8 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
                 );
             }
         }
-        return $images;
-    }
 
-    public function getSingleImage()
-    {
-        $product = $this->getProduct();
-        $use_bynder_cdn = $product->getData('use_bynder_cdn');
-        if ($use_bynder_cdn == 1) {
-            $img_attr = $product->getData('bynder_multi_img');
-            $bynder_image = trim($img_attr);
-           
-            if (!empty($bynder_image)) {
-                $byder_image_array = explode(" \n", $bynder_image);
-                $cookie_array = array_filter($byder_image_array);
-                $i = 1;
-                foreach ($cookie_array as $values) {
-                    $values = trim($values);
-                    if ($i == 1 && !empty($values)) {
-                        return $values;
-                        $i++;
-                    }
-                }
-            }
-        }
-        return '0';
+        return $images;
     }
 
     /**
@@ -143,7 +128,6 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
      *
      * @return string
      */
-
     public function getMagnifier()
     {
         return $this->jsonEncoder->encode($this->getVar('magnifier'));
@@ -154,51 +138,9 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
      *
      * @return string
      */
-
     public function getBreakpoints()
     {
         return $this->jsonEncoder->encode($this->getVar('breakpoints'));
-    }
-
-    /*
-     * Dev_31-03-2021
-     */
-
-    public function getGalleryVideoJson()
-    {
-        $item_array = array();
-        $product = $this->_registry->registry('product');
-        $use_bynder_cdn = $product->getData('use_bynder_cdn');
-        $use_bynder_both_image = $product->getData('use_bynder_both_image');
-        if (!empty($product->getData('bynder_videos'))) {
-            $bynder_videos = $product->getData('bynder_videos');
-            $byder_videos_array = explode(" ", $bynder_videos);
-            $cookie_array = array_filter($byder_videos_array);
-            foreach ($cookie_array as $v) {
-                $v = trim($v);
-                if (!empty($v)) {
-                    $thumb_img = "";
-                    $thumb = explode("@@", $v);
-                    if (isset($thumb[0]) && isset($thumb[1])) {
-                        $thumb_img = $thumb[1];
-                    }
-                    if(empty($thumb_img)){
-                        $thumb_img = $this->_logo->getLogoSrc();
-                    }else{
-                        $thumb_img;
-                    }
-                    $v = explode("?", $v);
-                    $item_array[] = array(
-                        "thumb" => $thumb_img,
-                        "caption" => $this->getProduct()->getName(),
-                        "src" => $v[0],
-                        "type" => 'iframe'
-                    );
-                }
-            }
-        }
-        //}
-        return json_encode($item_array, true);
     }
 
     /**
@@ -206,20 +148,48 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
      *
      * @return string
      */
+    
     public function getGalleryImagesJson()
     {
-        $imagesItems = [];
         $product = $this->_registry->registry('product');
+
         $use_bynder_cdn = $product->getData('use_bynder_cdn');
         $use_bynder_both_image = $product->getData('use_bynder_both_image');
-
         if ($use_bynder_both_image == 1) { /*Both Image*/
+            
+            if (!empty($product->getData('bynder_multi_img'))) {
+                $bynder_image = $product->getData('bynder_multi_img');
+                $json_value = json_decode($bynder_image, true);
+                
+                $role_image = 0;
+                foreach ($json_value as $key => $values) {
+                    $image_values =  trim($values['thum_url']);
+                    foreach ($values['image_role'] as $image_role) {
+                        if ($image_role ==  'image') {
+                            $role_image = 1;
+                        }
+                    }
+                    $imageItem = new DataObject([
+                        'thumb' => $image_values,
+                        'img' => $image_values,
+                        'full' => $image_values,
+                        'caption' => $this->getProduct()->getName(),
+                        'position' => $key + 1,
+                        'isMain' =>$role_image,
+                        'type' => ($values['item_type'] == 'IMAGE') ? 'image' : 'video',
+                        'videoUrl' => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
+                        "src" => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
+                        "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : null
+                    ]);
+                    $imagesItems[] = $imageItem->toArray();
+                }
+            }
             foreach ($this->getGalleryImages() as $image) {
                 $imageItem = new DataObject([
                     'thumb' => $image->getData('small_image_url'),
                     'img' => $image->getData('medium_image_url'),
                     'full' => $image->getData('large_image_url'),
-                    'caption' => ($image->getLabel() ?: $this->getProduct()->getName()),
+                    'caption' => ($role_image == 1) ? 0 :($image->getLabel() ?: $this->getProduct()->getName()),
                     'position' => $image->getData('position'),
                     'isMain' => $this->isMainImage($image),
                     'type' => str_replace('external-', '', $image->getMediaType()),
@@ -233,45 +203,31 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
                 }
                 $imagesItems[] = $imageItem->toArray();
             }
-            if (!empty($product->getData('bynder_multi_img'))) {
-                $bynder_image = $product->getData('bynder_multi_img');
-                $byder_image_array = explode(" ", $bynder_image);
-                $cookie_array = array_filter($byder_image_array);
-                foreach ($cookie_array as $values) {
-                    $values = trim($values);
-                    $imageItem = new DataObject([
-                        'thumb' => $values,
-                        'img' => $values,
-                        'full' => $values,
-                        'caption' => $product->getName(),
-                        'position' => 1,
-                        'isMain' => 1,
-                        'type' => 'image',
-                        'videoUrl' => null,
-                    ]);
-                    $imagesItems[] = $imageItem->toArray();
-                }
-            }
         } elseif ($use_bynder_cdn == 1) { /*CDN Image*/
             if (!empty($product->getData('bynder_multi_img'))) {
                 $bynder_image = $product->getData('bynder_multi_img');
-                $byder_image_array = explode(" ", $bynder_image);
-                $cookie_array = array_filter($byder_image_array);
-                foreach ($cookie_array as $values) {
-                    $values = trim($values);
-                    if (!empty($values)) {
-                        $imageItem = new DataObject([
-                            'thumb' => $values,
-                            'img' => $values,
-                            'full' => $values,
-                            'caption' => $product->getName(),
-                            'position' => 1,
-                            'isMain' => 1,
-                            'type' => 'image',
-                            'videoUrl' => null,
-                        ]);
-                        $imagesItems[] = $imageItem->toArray();
+                $json_value = json_decode($bynder_image, true);
+                $role_image = 0;
+                foreach ($json_value as $key => $values) {
+                    $image_values =  trim($values['thum_url']);
+                    foreach ($values['image_role'] as $image_role) {
+                        if ($image_role ==  'image') {
+                            $role_image = 1;
+                        }
                     }
+                    $imageItem = new DataObject([
+                        'thumb' => $image_values,
+                        'img' => $image_values,
+                        'full' => $image_values,
+                        'caption' => $this->getProduct()->getName(),
+                        'position' => $key + 1,
+                        'isMain' =>$role_image,
+                        'type' => ($values['item_type'] == 'IMAGE') ? 'image' : 'video',
+                        'videoUrl' => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
+                        "src" => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
+                        "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : null
+                    ]);
+                    $imagesItems[] = $imageItem->toArray();
                 }
             } else {
                 /* CDN link empty */
@@ -357,7 +313,7 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
     public function getImageAttribute($imageId, $attributeName, $default = null)
     {
         $attributes = $this->getConfigView()
-                ->getMediaAttributes('Magento_Catalog', Image::MEDIA_TYPE_CONFIG_NODE, $imageId);
+            ->getMediaAttributes('Magento_Catalog', Image::MEDIA_TYPE_CONFIG_NODE, $imageId);
         return $attributes[$attributeName] ?? $default;
     }
 

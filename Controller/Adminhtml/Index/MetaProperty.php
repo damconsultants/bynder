@@ -1,17 +1,12 @@
 <?php
 
-/**
- * the dam consultants Software.
- *
- * @category  the dam consultants
- * @package   DamConsultants_Bynder
- * @author    the dam consultants
- */
-
 namespace DamConsultants\Bynder\Controller\Adminhtml\Index;
 
 class MetaProperty extends \Magento\Backend\App\Action
 {
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
     protected $resultPageFactory = false;
 
     /**
@@ -26,11 +21,16 @@ class MetaProperty extends \Magento\Backend\App\Action
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
     }
-
+    /**
+     * Execute
+     *
+     * @return $this
+     */
     public function execute()
     {
         $resultPage = $this->resultPageFactory->create();
-        $resultPage->getConfig()->getTitle()->prepend((__('Select The Metaproperty That Should Trigger An Asset To Sync To Magento')));
+        $resultPage->getConfig()->getTitle()
+        ->prepend((__('Select The Metaproperty That Should Trigger An Asset To Sync To Magento')));
         return $resultPage;
     }
 }

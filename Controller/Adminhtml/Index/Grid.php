@@ -1,24 +1,19 @@
 <?php
 
-/**
- * the dam consultants Software.
- *
- * @category  the dam consultants
- * @package   DamConsultants_Bynder
- * @author    the dam consultants
- */
-
 namespace DamConsultants\Bynder\Controller\Adminhtml\Index;
 
 class Grid extends \Magento\Backend\App\Action
 {
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
     protected $resultPageFactory = false;
 
-     /**
-      * Edit constructor.
-      * @param \Magento\Backend\App\Action\Context $context
-      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
-      */
+    /**
+     * Grid.
+     * @param \Magento\Backend\App\Action\Context $context
+     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory
@@ -26,7 +21,11 @@ class Grid extends \Magento\Backend\App\Action
         parent::__construct($context);
         $this->resultPageFactory = $resultPageFactory;
     }
-
+    /**
+     * Execute
+     *
+     * @return $this
+     */
     public function execute()
     {
         $resultPage = $this->resultPageFactory->create();

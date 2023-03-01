@@ -1,9 +1,16 @@
-<input type="hidden" name="<?php echo $this->getNamePrefix() ?>" value="" /><!-- this is send if nothing is checked -->
+
+<input type="hidden"
+    name="<?= $block->escapeHtml($block->getNPrefix()) ?>"
+    value="" /><!-- this is send if nothing is checked -->
 <ul class="checkboxes">
-    <?php foreach ($this->getValues() as $name => $label) : ?>
+    <?php foreach ($block->getValues() as $name => $label): ?>
         <li>
-            <input type="checkbox" value="<?php echo $name ?>" name="<?php echo $this->getNamePrefix() ?>[]" id="<?php echo $this->getHtmlId() . '_' . $name ?>" <?php echo ($this->getIsChecked($name) ? ' checked="checked"' : '') ?> /><label for="<?php echo $this->getHtmlId() . '_' . $name ?>">
-                <?php echo $label ?>
+            <input type="checkbox" value="<?= $block->escapeHtml($name) ?>"
+                name="<?= $block->escapeHtml($block->getNPrefix()) ?>[]"
+                id="<?= $block->escapeHtml($block->getId() . '_' . $name) ?>"
+                <?= ($block->escapeHtml($block->getCheck($name)) ? ' checked="checked"' : '') ?> />
+            <label for="<?=$block->escapeHtml($block->getId() . '_' . $name) ?>">
+                <?=  $block->escapeHtml($label) ?>
             </label>
         </li>
     <?php endforeach; ?>

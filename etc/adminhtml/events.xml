@@ -1,11 +1,14 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="catalog_product_gallery_prepare_layout">
+    <!-- <event name="catalog_product_gallery_prepare_layout">
         <observer name="change_template" disabled="true"/>
         <observer name="custom_change_template" instance="DamConsultants\Bynder\Observer\OptionObserver" />
-    </event>
-    <event name="catalog_product_save_after">
+    </event> -->
+    <!-- <event name="catalog_product_save_after">
         <observer name="save_bynder_image_data" instance="DamConsultants\Bynder\Observer\ProductSaveAfter" />
+    </event> -->
+     <event name="catalog_product_save_after">
+        <observer name="save_bynder_image_data" instance="DamConsultants\Bynder\Observer\ProductDataSaveAfter" />
     </event>
     <event name="catalog_category_save_after">
         <observer name="catalog_megamenu" instance="DamConsultants\Bynder\Observer\CategorySaveAfter" />

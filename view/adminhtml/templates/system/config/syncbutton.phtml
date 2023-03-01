@@ -1,4 +1,4 @@
-<?php echo $block->getButtonHtml(); ?>
+<?= $block->getButtonHtml(); ?>
 <script>
     require([
         'jquery',
@@ -12,7 +12,7 @@
                 product_sku: product_sku,
                 select_attribute: select_attribute
             };
-            new Ajax.Request('<?php echo $block->getAjaxUrl() ?>', {
+            new Ajax.Request('<?= $block->escapeUrl($block->getAjaxUrl()); ?>', {
                 parameters: params,
                 loaderArea: true,
                 asynchronous: true,

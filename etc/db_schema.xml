@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
-   <table name="bynder_data_product" resource="default" engine="innodb" comment="bynder data product">
-      <column xsi:type="int" name="bynder_id" padding="7" unsigned="false" nullable="false" identity="true" comment="bynder id" />
-      <column xsi:type="text" name="images_json" nullable="true"  comment="images_json" />
-      <column xsi:type="text" name="doc_json" nullable="true"  comment="doc_json" />
-      <column xsi:type="text" name="video_url" nullable="true" comment="video_url" />
-      <constraint xsi:type="primary" referenceId="PRIMARY">
-         <column name="bynder_id" />
-      </constraint>
-   </table>
    <table name="bynder_metaproperty" resource="default" engine="innodb" comment="Bynder MetaProperty">
       <column xsi:type="int" name="id" padding="7" unsigned="false" nullable="false" identity="true" comment="id" />
       <column xsi:type="text" name="property_name" nullable="true"  comment="property_name" />
@@ -23,7 +14,7 @@
       <column xsi:type="text" name="bynder_data" nullable="true"  comment="bynder data sync. image, doc, video" />
       <column xsi:type="text" name="bynder_data_type" nullable="true"  comment="1= Image , 2= doc,3= video" />
       <column xsi:type="text" name="media_id" nullable="true"  comment="Bynder Data Media id " />
-      <column xsi:type="text" name="remove_for_magento" nullable="true"  comment="1= not remove for magento , 0= remove for magento" />
+      <column xsi:type="text" name="remove_for_magento" nullable="true"  comment="1= not remove for magento , 0= remove for magento,2= change on bynder" />
       <column xsi:type="text" name="added_on_cron_compactview" nullable="true"  comment="1 = added on cron , 2 = added on compactview" />
       <column xsi:type="text" name="added_date" nullable="true"  comment="when data add on our table" />
       <constraint xsi:type="primary" referenceId="PRIMARY">

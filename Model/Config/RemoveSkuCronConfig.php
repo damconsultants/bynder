@@ -14,14 +14,6 @@ namespace DamConsultants\Bynder\Model\Config;
 class RemoveSkuCronConfig extends \Magento\Framework\App\Config\Value
 {
     /**
-     * Cron string path
-     */
-    const CRON_STRING_PATH = 'crontab/default/jobs/damConsultants_bynder_delete_sku_form_magento/schedule/cron_expr';
-    /**
-     * Cron model path
-     */
-    const CRON_MODEL_PATH = 'crontab/default/jobs/damConsultants_bynder_delete_sku_form_magento/run/model';
-    /**
      * @var \Magento\Framework\App\Config\ValueFactory
      */
     protected $_configValueFactory;
@@ -56,43 +48,73 @@ class RemoveSkuCronConfig extends \Magento\Framework\App\Config\Value
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
     /**
-     * {@inheritdoc}
+     * After Save
      *
      * @return $this
      * @throws \Exception
      */
     public function afterSave()
     {
-        $time = $this->getData('groups/delete_bynder_data/fields/time/value');
-        $frequency = $this->getData('groups/delete_bynder_data/fields/frequency/value');
-        $cronExprArray = [
-            intval($time[1]), //Minute
-            intval($time[0]), //Hour
-            $frequency == \DamConsultants\Bynder\Model\Config\Source\Frequency::CRON_MONTHLY ? '1' : '*', //Day of the Month
-            '*', //Month of the Year
-            $frequency == \DamConsultants\Bynder\Model\Config\Source\Frequency::CRON_WEEKLY ? '1' : '*', //Day of the Week
-        ];
+        $time = $this->getData('groups/delete_bynder_data/fields/remove_sku_time/value');
+        $frequency = $this->getData('groups/delete_bynder_data/fields/remove_sku_frequency/value');
+        $custom_time = $this->getConfigValue();
+        $every_min =  \DamConsultants\Bynder\Model\Config\Source\Frequency::EVERY_TEN_TIME;
+        if ($frequency == $every_min) {
+            $cronExprArray = [
+                $custom_time, //Minute
+                '*', //Hour
+                '*', //Day of the Month
+                '*', //Month of the Year
+                '*', //Day of the Week
+            ];
+        } else {
+            $cronExprArray = [
+                (int)$time[1], //Minute
+                (int)$time[0], //Hour
+                $frequency == \DamConsultants\Bynder\Model\Config\Source\Frequency::CRON_MONTHLY ?
+                '1' : '*', //Day of the Month
+                '*', //Month of the Year
+                $frequency == \DamConsultants\Bynder\Model\Config\Source\Frequency::CRON_WEEKLY ?
+                '1' : '*', //Day of the Week
+            ];
+        }
         $cronExprString = join(' ', $cronExprArray);
         try {
             $this->_configValueFactory->create()->load(
-                self::CRON_STRING_PATH,
+                'crontab/default/jobs/damConsultants_bynder_delete_sku_form_magento/schedule/cron_expr',
                 'path'
             )->setValue(
                 $cronExprString
             )->setPath(
-                self::CRON_STRING_PATH
+                'crontab/default/jobs/damConsultants_bynder_delete_sku_form_magento/schedule/cron_expr'
             )->save();
             $this->_configValueFactory->create()->load(
-                self::CRON_MODEL_PATH,
+                'crontab/default/jobs/damConsultants_bynder_delete_sku_form_magento/run/model',
                 'path'
             )->setValue(
                 $this->_runModelPath
             )->setPath(
-                self::CRON_MODEL_PATH
+                'crontab/default/jobs/damConsultants_bynder_delete_sku_form_magento/run/model'
             )->save();
         } catch (\Exception $e) {
-            throw new \Exception(__('We can\'t save the cron expression.'));
+            $this->messageManager->addException($e, __('We can\'t save the cron expression.'));
         }
         return parent::afterSave();
+    }
+    /**
+     * Get ConfigValue
+     *
+     * @return $this
+     */
+    public function getConfigValue()
+    {
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $scopeConfig = $objectManager->get(\Magento\Framework\App\Config\ScopeConfigInterface::class);
+        $storeManager = $objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
+        return $scopeConfig->getValue(
+            "cronimageconfig/delete_bynder_data/your_min_remove",
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            $storeManager->getStore()->getStoreId()
+        );
     }
 }

@@ -150,22 +150,28 @@
                 </item>
             </argument>
         </column>
-        <column name="bynder_data_type">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Data Type</item>
-                </item>
-            </argument>
-        </column>
-        <column name="remove_for_magento">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="filter" xsi:type="string">text</item>
-                    <item name="label" xsi:type="string" translate="true">Remove For Magento</item>
-                </item>
-            </argument>
-        </column>
+        <column name="bynder_data_type" class="DamConsultants\Bynder\Ui\Component\Listing\Column\DataType">
+			<argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">DamConsultants\Bynder\Model\Config\Source\DataType</item>
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">select</item>
+                    <item name="dataType" xsi:type="string">select</item>
+					<item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+					<item name="label" xsi:type="string" translate="true">Data Type</item>
+				</item>
+			</argument>
+		</column>
+        <column name="remove_for_magento" class="DamConsultants\Bynder\Ui\Component\Listing\Column\Remove">
+			<argument name="data" xsi:type="array">
+                <item name="options" xsi:type="object">DamConsultants\Bynder\Model\Config\Source\Remove</item>
+				<item name="config" xsi:type="array">
+					<item name="filter" xsi:type="string">select</item>
+                    <item name="dataType" xsi:type="string">select</item>
+					<item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+					<item name="label" xsi:type="string" translate="true">Remove For Magento</item>
+				</item>
+			</argument>
+		</column>
         <column name="added_date">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">

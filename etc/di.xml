@@ -3,6 +3,7 @@
     <!--<type name="Magento\Config\Model\Config">
         <plugin name="admin_system_config_save_plugin" type="DamConsultants\Bynder\Plugin\ConfigPlugin" sortOrder="1"/>
     </type>-->
+    <!-- <preference for="Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Gallery\Content" type="DamConsultants\Bynder\Block\Adminhtml\Product\Helper\Form\Gallery\Content" /> -->
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">

@@ -4,8 +4,10 @@ $selected_property_name = $block->getMetaData()['property_name'];
 
 ?>
 
-<form name="metaproperty" action="<?php echo $block->getSubmitUrl(); ?>" method="post" enctype="multipart/form-data">
-    <?php echo $block->getBlockHtml('formkey')
+<form name="metaproperty" 
+    action="<?= $block->escapeUrl($block->getSubmitUrl()); ?>" 
+    method="post" enctype="multipart/form-data">
+    <?= $block->getBlockHtml('formkey');
     ?>
     <div class="main_container dear-stock-sec">
         <div class="main_header_master admin__data-grid-wrap">
@@ -19,21 +21,30 @@ $selected_property_name = $block->getMetaData()['property_name'];
                             <p>Bynder property not getting.</p>
                             <?php } else {
 
-                            foreach ($get_metaData as $v) {
-                                $checked = "";
-                                if ($selected_property_name == $v["name"]) {
-                                    $checked = "checked";
-                                }
+                        foreach ($get_metaData as $v) {
+                            $checked = "";
+                            if ($selected_property_name == $v["name"]) {
+                                $checked = "checked";
+                            }
                             ?>
                                 <label class="form-check-label">
-                                    <input type="radio" name="select_meta_tag" class="form-check-input meta_tag_options" value="<?php echo $v['name']; ?>" <?php echo $checked; ?> /> <?php echo $v["label"]; ?>
+                                    <input type="radio" name="select_meta_tag" 
+                                        class="form-check-input meta_tag_options" 
+                                        value="<?= $block->escapeHtml($v['name']); ?>" 
+                                        <?= $block->escapeHtml($checked); ?> /> 
+                                        <?= $block->escapeHtml($v["label"]); ?>
                                 </label>
                                 </br>
-                        <?php
-                            }
+                            <?php
                         }
-                        ?>
-                        <button type="submit" class="action- scalable primary" name="submit" id="btn_submit"><span><?php echo __('Save Property'); ?></span></button>
+                            }
+                            ?>
+                        <button type="submit" class="action- scalable primary" 
+                            name="submit" id="btn_submit">
+                            <span>
+                                <?= $block->escapeHtml('Save Property'); ?>
+                            </span>
+                        </button>
                 </div>
             </div>
         </div>

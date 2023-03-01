@@ -1,30 +1,40 @@
 <?php
-/**
- * the dam consultants Software.
- *
- * @category  the dam consultants
- * @package   DamConsultants_Bynder
- * @author    the dam consultants
- */
 
- 
 namespace DamConsultants\Bynder\Block\Adminhtml\Metaproperty;
 
-class Index extends  \Magento\Backend\Block\Template
-{
+use DamConsultants\Bynder\Model\ResourceModel\Collection\MetaPropertyCollectionFactory;
 
-    protected $helperdata;
-    protected $metaProperty;
-    protected $metaPropertyCollectionFactory;
+class Index extends \Magento\Backend\Block\Template
+{
     /**
+     * @var \DamConsultants\Bynder\Helper\Data
+     */
+    protected $helperdata;
+
+    /**
+     * @var \DamConsultants\Bynder\Model\MetaPropertyFactory
+     */
+    protected $metaProperty;
+
+    /**
+     * @var \DamConsultants\Bynder\Model\ResourceModel\Collection\MetaPropertyCollectionFactory
+     */
+    protected $metaPropertyCollectionFactory;
+
+    /**
+     * Metaproperty
      * @param \Magento\Framework\View\Element\Template\Context $context
+     * @param \DamConsultants\Bynder\Helper\Data $helperdata
+     * @param \DamConsultants\Bynder\Model\MetaPropertyFactory $metaProperty
+     * @param MetaPropertyCollectionFactory $metaPropertyCollectionFactory
      * @param array $data
      */
+
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \DamConsultants\Bynder\Helper\Data $helperdata,
         \DamConsultants\Bynder\Model\MetaPropertyFactory $metaProperty,
-        \DamConsultants\Bynder\Model\ResourceModel\Collection\MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
+        MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
         array $data = []
     ) {
         $this->_helperdata = $helperdata;
@@ -33,15 +43,24 @@ class Index extends  \Magento\Backend\Block\Template
         parent::__construct($context, $data);
     }
 
+    /**
+     * SubmitUrl.
+     *
+     * @return $this
+     */
     public function getSubmitUrl()
     {
         return $this->getUrl("bynder/index/submit");
     }
-
+    /**
+     * Get MetaData.
+     *
+     * @return $this
+     */
     public function getMetaData()
     {
         $property_name = "";
-        $metadata = $this->_helperdata->get_bynder_meta_properites();
+        $metadata = $this->_helperdata->getBynderMetaProperites();
         $collection = $this->_metaPropertyCollectionFactory->create();
         if (count($collection->getData()) !== 0) {
             $property_name = $collection->getData()[0]['property_name'];
@@ -51,16 +70,16 @@ class Index extends  \Magento\Backend\Block\Template
 
         $data =  json_decode($metadata, true);
         if ($data['status'] == 1) {
-            $response_data = array(
+            $response_data = [
                 'metadata' => $data['data'],
                 'property_name' => $property_name,
-            );
+            ];
            
         } else {
-            $response_data = array(
+            $response_data = [
                 'metadata' => 0,
                 'property_name' => $property_name,
-            );
+            ];
         }
         return $response_data;
     }

@@ -1,5 +1,5 @@
 <div class="pp-buttons-container">
-    <?php echo $block->getButtonHtml(); ?>
+    <?= $block->getButtonHtml(); ?>
 </div>
 <script>
     require([
@@ -20,7 +20,6 @@
             
         });
 
-
         $('#bt_id_2').click(function() {
             var product_sku = $('textarea#byndersyncdata_bynder_sync_data_sku').val();
             var select_attribute = $('select#byndersyncdata_bynder_sync_data_select').val();
@@ -29,13 +28,14 @@
             }else{
                 sku_limit = 0;
             }
-            console.log(select_attribute);
+           
+           
             var params = {
                 product_sku: product_sku,
                 select_attribute: select_attribute,
                 sku_limit:sku_limit
             };
-            new Ajax.Request('<?php echo $block->getAjaxUrl() ?>', {
+            new Ajax.Request('<?= $block->escapeUrl($block->getAjaxUrl()); ?>', {
                 parameters: params,
                 loaderArea: true,
                 asynchronous: true,

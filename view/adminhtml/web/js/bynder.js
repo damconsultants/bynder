@@ -6,10 +6,6 @@ require([
 	"mage/adminhtml/events",
 	"mage/adminhtml/wysiwyg/tiny_mce/setup"
 ], function ($,url,modal) {
-				
-	function bynder_media_action() {
-	}
-
 	jQuery("body").append('<div id="popup-modal" style="display:none;"><div id="compactViewContainer"></div></div>');
 	
 	/* jQuery("#cms_bynder_action").bind("click", function () { */
@@ -262,10 +258,6 @@ require([
 												setTimeout( function() { 
 													jQuery(".mce-container-body.mce-flow-layout div[aria-label='Bold'] button")[0].click();
 												}, 500);
-												
-												setTimeout(function () {
-														jQuery("#product_form_short_description")[0].click();
-												},500);
 
 											}
 											*/

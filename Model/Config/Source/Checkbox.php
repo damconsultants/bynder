@@ -1,6 +1,7 @@
 <?php
 
 namespace DamConsultants\Bynder\Model\Config\Source;
+
 /**
  * Used in creating options for getting product type value
  *

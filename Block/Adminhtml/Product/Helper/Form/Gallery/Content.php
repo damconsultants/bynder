@@ -11,7 +11,7 @@
  *
  * @method \Magento\Framework\Data\Form\Element\AbstractElement getElement()
  */
-namespace Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Gallery;
+namespace DamConsultants\Bynder\Block\Adminhtml\Product\Helper\Form\Gallery;
 
 use Magento\Framework\App\ObjectManager;
 use Magento\Backend\Block\Media\Uploader;
@@ -20,11 +20,12 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Backend\Block\DataProviders\ImageUploadConfig as ImageUploadConfigDataProvider;
 use Magento\MediaStorage\Helper\File\Storage\Database;
+use DamConsultants\Bynder\Helper\Data;
 
 /**
  * Block for gallery content.
  */
-class Content extends \Magento\Backend\Block\Widget
+class Content extends \Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Gallery\Content
 {
     /**
      * @var string
@@ -57,251 +58,59 @@ class Content extends \Magento\Backend\Block\Widget
     private $fileStorageDatabase;
 
     /**
+     * Catalog product form gallery content
+     *
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\Json\EncoderInterface $jsonEncoder
      * @param \Magento\Catalog\Model\Product\Media\Config $mediaConfig
-     * @param array $data
      * @param ImageUploadConfigDataProvider $imageUploadConfigDataProvider
+     * @param Data $bynderData
+     * @param \Magento\Framework\App\RequestInterface $httpRequest
      * @param Database $fileStorageDatabase
+     * @param array $data
      */
+
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Json\EncoderInterface $jsonEncoder,
         \Magento\Catalog\Model\Product\Media\Config $mediaConfig,
-        array $data = [],
         ImageUploadConfigDataProvider $imageUploadConfigDataProvider = null,
-        Database $fileStorageDatabase = null
+        Data $bynderData,
+        \Magento\Framework\App\RequestInterface $httpRequest,
+        Database $fileStorageDatabase = null,
+        array $data = []
     ) {
-        $this->_jsonEncoder = $jsonEncoder;
-        $this->_mediaConfig = $mediaConfig;
-        parent::__construct($context, $data);
-        $this->imageUploadConfigDataProvider = $imageUploadConfigDataProvider
-            ?: ObjectManager::getInstance()->get(ImageUploadConfigDataProvider::class);
-        $this->fileStorageDatabase = $fileStorageDatabase
-            ?: ObjectManager::getInstance()->get(Database::class);
+        parent::__construct($context, $jsonEncoder, $mediaConfig, $data);
+        $this-> request = $httpRequest;
+        $this->b_datahelper = $bynderData;
     }
-
     /**
-     * Prepare layout.
-     *
-     * @return AbstractBlock
-     */
-    protected function _prepareLayout()
-    {
-        $this->addChild(
-            'uploader',
-            \Magento\Backend\Block\Media\Uploader::class,
-            ['image_upload_config_data' => $this->imageUploadConfigDataProvider]
-        );
-
-        $this->getUploader()->getConfig()->setUrl(
-            $this->_urlBuilder->getUrl('catalog/product_gallery/upload')
-        )->setFileField(
-            'image'
-        )->setFilters(
-            [
-                'images' => [
-                    'label' => __('Images (.gif, .jpg, .png)'),
-                    'files' => ['*.gif', '*.jpg', '*.jpeg', '*.png'],
-                ],
-            ]
-        );
-
-        $this->_eventManager->dispatch('catalog_product_gallery_prepare_layout', ['block' => $this]);
-
-        return parent::_prepareLayout();
-    }
-
-    /**
-     * Retrieve uploader block
-     *
-     * @return Uploader
-     */
-    public function getUploader()
-    {
-        return $this->getChildBlock('uploader');
-    }
-
-    /**
-     * Retrieve uploader block html
-     *
-     * @return string
-     */
-    public function getUploaderHtml()
-    {
-        return $this->getChildHtml('uploader');
-    }
-
-    /**
-     * Returns js object name
-     *
-     * @return string
-     */
-    public function getJsObjectName()
-    {
-        return $this->getHtmlId() . 'JsObject';
-    }
-
-    /**
-     * Returns buttons for add image action.
-     *
-     * @return string
-     */
-    public function getAddImagesButton()
-    {
-        return $this->getButtonHtml(
-            __('Add New Images'),
-            $this->getJsObjectName() . '.showUploader()',
-            'add',
-            $this->getHtmlId() . '_add_images_button'
-        );
-    }
-
-    /**
-     * Returns image json
-     *
-     * @return string
-     */
-    public function getImagesJson()
-    {
-        $value = $this->getElement()->getImages();
-        if (is_array($value) &&
-            array_key_exists('images', $value) &&
-            is_array($value['images']) &&
-            count($value['images'])
-        ) {
-            $mediaDir = $this->_filesystem->getDirectoryRead(DirectoryList::MEDIA);
-            $images = $this->sortImagesByPosition($value['images']);
-            foreach ($images as &$image) {
-                $image['url'] = $this->_mediaConfig->getMediaUrl($image['file']);
-                if ($this->fileStorageDatabase->checkDbUsage() &&
-                    !$mediaDir->isFile($this->_mediaConfig->getMediaPath($image['file']))
-                ) {
-                    $this->fileStorageDatabase->saveFileToFilesystem(
-                        $this->_mediaConfig->getMediaPath($image['file'])
-                    );
-                }
-                try {
-                    $fileHandler = $mediaDir->stat($this->_mediaConfig->getMediaPath($image['file']));
-                    $image['size'] = $fileHandler['size'];
-                } catch (FileSystemException $e) {
-                    $image['url'] = $this->getImageHelper()->getDefaultPlaceholderUrl('small_image');
-                    $image['size'] = 0;
-                    $this->_logger->warning($e);
-                }
-            }
-            return $this->_jsonEncoder->encode($images);
-        }
-        return '[]';
-    }
-
-    /**
-     * Sort images array by position key
-     *
-     * @param array $images
-     * @return array
-     */
-    private function sortImagesByPosition($images)
-    {
-        if (is_array($images)) {
-            usort(
-                $images,
-                function ($imageA, $imageB) {
-                    return ($imageA['position'] < $imageB['position']) ? -1 : 1;
-                }
-            );
-        }
-        return $images;
-    }
-
-    /**
-     * Returns image values json
-     *
-     * @return string
-     */
-    public function getImagesValuesJson()
-    {
-        $values = [];
-        foreach ($this->getMediaAttributes() as $attribute) {
-            /* @var $attribute \Magento\Eav\Model\Entity\Attribute */
-            $values[$attribute->getAttributeCode()] = $this->getElement()->getDataObject()->getData(
-                $attribute->getAttributeCode()
-            );
-        }
-        return $this->_jsonEncoder->encode($values);
-    }
-
-    /**
-     * Get image types data
+     * Check Bynder.
      *
      * @return array
      */
-    public function getImageTypes()
+    public function getcheckbynder()
     {
-        $imageTypes = [];
-        foreach ($this->getMediaAttributes() as $attribute) {
-            /* @var $attribute \Magento\Eav\Model\Entity\Attribute */
-            $value = $this->getElement()->getDataObject()->getData($attribute->getAttributeCode())
-                ?: $this->getElement()->getImageValue($attribute->getAttributeCode());
-            $imageTypes[$attribute->getAttributeCode()] = [
-                'code' => $attribute->getAttributeCode(),
-                'value' => $value,
-                'label' => $attribute->getFrontend()->getLabel(),
-                'scope' => __($this->getElement()->getScopeLabel($attribute)),
-                'name' => $this->getElement()->getAttributeFieldName($attribute),
-            ];
-        }
-        return $imageTypes;
+        $check_bynder = $this->b_datahelper->getCheckBynder();
+        $array = json_decode($check_bynder, true);
+        return $array;
     }
-
     /**
-     * Retrieve default state allowance
+     * Get HttpData.
      *
-     * @return bool
+     * @return $this
      */
-    public function hasUseDefault()
+    public function getHttpData()
     {
-        foreach ($this->getMediaAttributes() as $attribute) {
-            if ($this->getElement()->canDisplayUseDefault($attribute)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->request->getServer('HTTP_HOST');
     }
-
     /**
-     * Retrieve media attributes
+     * EntityId.
      *
-     * @return array
+     * @return $this
      */
-    public function getMediaAttributes()
+    public function getEntityId()
     {
-        return $this->getElement()->getDataObject()->getMediaAttributes();
-    }
-
-    /**
-     * Retrieve JSON data
-     *
-     * @return string
-     */
-    public function getImageTypesJson()
-    {
-        return $this->_jsonEncoder->encode($this->getImageTypes());
-    }
-
-    /**
-     * Returns image helper object.
-     *
-     * @return \Magento\Catalog\Helper\Image
-     * @deprecated 101.0.3
-     */
-    private function getImageHelper()
-    {
-        if ($this->imageHelper === null) {
-            $this->imageHelper = \Magento\Framework\App\ObjectManager::getInstance()
-                ->get(\Magento\Catalog\Helper\Image::class);
-        }
-        return $this->imageHelper;
+        return $this->getRequest()->getParam('id');
     }
 }

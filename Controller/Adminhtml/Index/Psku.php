@@ -1,30 +1,30 @@
 <?php
 
-/**
- * the dam consultants Software.
- *
- * @category  the dam consultants
- * @package   DamConsultants_Bynder
- * @author    the dam consultants
- */
-
 namespace DamConsultants\Bynder\Controller\Adminhtml\Index;
 
-set_time_limit(0);
+use DamConsultants\Bynder\Model\ResourceModel\Collection\MetaPropertyCollectionFactory;
+use DamConsultants\Bynder\Model\ResourceModel\Collection\BynderSycDataCollectionFactory;
 
-/**
- * Class Psku
- * @package DamConsultants\Bynder\Controller\Index
- */
 class Psku extends \Magento\Backend\App\Action
 {
-
+    /**
+     * @var \Magento\Framework\View\Result\PageFactory
+     */
     protected $resultPageFactory = false;
 
     /**
-     * Edit constructor.
+     * Product Sku.
      * @param \Magento\Backend\App\Action\Context $context
-     * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
+     * @param \Magento\Catalog\Model\Product\Action $action
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
+     * @param \DamConsultants\Bynder\Model\BynderFactory $bynder
+     * @param \DamConsultants\Bynder\Model\BynderSycDataFactory $byndersycData
+     * @param \Magento\Catalog\Model\Product $product
+     * @param \Magento\Catalog\Model\ProductRepository $productRepository
+     * @param MetaPropertyCollectionFactory $metaPropertyCollectionFactory
+     * @param \DamConsultants\Bynder\Helper\Data $DataHelper
+     * @param BynderSycDataCollectionFactory $byndersycDataCollection
+     * @param \Magento\Framework\Controller\Result\JsonFactory $jsonFactory
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
@@ -34,9 +34,9 @@ class Psku extends \Magento\Backend\App\Action
         \DamConsultants\Bynder\Model\BynderSycDataFactory $byndersycData,
         \Magento\Catalog\Model\Product $product,
         \Magento\Catalog\Model\ProductRepository $productRepository,
-        \DamConsultants\Bynder\Model\ResourceModel\Collection\MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
+        MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
         \DamConsultants\Bynder\Helper\Data $DataHelper,
-        \DamConsultants\Bynder\Model\ResourceModel\Collection\BynderSycDataCollectionFactory $byndersycDataCollection,
+        BynderSycDataCollectionFactory $byndersycDataCollection,
         \Magento\Framework\Controller\Result\JsonFactory $jsonFactory
     ) {
         parent::__construct($context);
@@ -51,7 +51,11 @@ class Psku extends \Magento\Backend\App\Action
         $this->_productRepository = $productRepository;
         $this->product = $product;
     }
-
+    /**
+     * Execute
+     *
+     * @return $this
+     */
     public function execute()
     {
 
@@ -59,348 +63,367 @@ class Psku extends \Magento\Backend\App\Action
             $this->_forward('noroute');
             return;
         }
-
-
         $property_id = null;
-        $productSku = array();
+        $productSku = [];
         $product_sku = $this->getRequest()->getParam('product_sku');
         $select_attribute = $this->getRequest()->getParam('select_attribute');
         $result = $this->resultJsonFactory->create();
         $productSku = explode(",", $product_sku);
-        $byndeimageconfig = $this->datahelper->byndeimageconfig();
-        $image_array = array();
-        $collection = $this->metaPropertyCollectionFactory->create()->getData()[0]['property_id'];
+        
+        $collection = $this->metaPropertyCollectionFactory->create()->getData();
         if (!empty($collection)) {
-            $property_id = $collection;
+            $collections = $this->metaPropertyCollectionFactory->create()->getData()[0]['property_id'];
+            $property_id = $collections;
         } else {
             $property_id = null;
         }
-
-        $data_arr = array();
-        $data_val_arr = array();
-
         foreach ($productSku as $sku) {
-            $get_data = $this->datahelper->image_sync_with_properties($sku, $property_id);
+            $get_data = $this->datahelper->getImageSyncWithProperties($sku, $property_id);
+            
             $respon_array = json_decode($get_data, true);
-            if (isset($respon_array)) {
-                if ($respon_array['status'] == 1) {
+            if ($respon_array['status'] == 1) {
                     $convert_array = json_decode($respon_array['data'], true);
+                    $this->getDataItem($select_attribute, $convert_array);
+            } else {
+                $result_data = $result->setData(
+                    ['status' => 0, 'message' => 'Please Select The Metaproperty First.....']
+                );
+                return $result_data;
+            }
+        }
+    }
+    /**
+     * Get Data Item
+     *
+     * @param string $select_attribute
+     * @param array $convert_array
+     */
+    public function getDataItem($select_attribute, $convert_array)
+    {
+        $data_arr = [];
+        $data_val_arr = [];
+        if ($convert_array['status'] == 1) {
+            foreach ($convert_array['data'] as $data_value) {
+                if ($select_attribute == $data_value['type']) {
+                    $image_data = $data_value['thumbnails'];
+                    $data_sku  = $data_value['property_TestMetaProperty'];
+                    if ($data_value['type'] == "image") {
+                            array_push($data_arr, $data_sku[0]);
+                            $data_p = ["sku" => $data_sku[0], "url" => $image_data["image_link"]];
+                            array_push($data_val_arr, $data_p);
+                    } else {
+                        if ($select_attribute == 'video') {
+                            $video_link =  $image_data["image_link"].'@@'.$image_data["webimage"];
+                            array_push($data_arr, $data_sku[0]);
+                            $data_p = ["sku" => $data_sku[0], "url" => $video_link];
+                            array_push($data_val_arr, $data_p);
 
-                    if ($convert_array['status'] == 1) {
-
-                        foreach ($convert_array['data'] as $data_value) {
-
-                            if ($select_attribute == $data_value['type']) {
-                                $image_data = $data_value['thumbnails'];
-                                $data_sku  = $data_value['property_TestMetaProperty'];
-                                if ($data_value['type'] == "image") {
-                                    foreach ($image_data as $k => $v) {
-                                        if ($byndeimageconfig == $k) {
-                                            array_push($data_arr, $data_sku[0]);
-                                            $data_p = array("sku" => $data_sku[0], "url" => $image_data["image_link"]);
-                                            array_push($data_val_arr, $data_p);
-                                        }
-                                    }
-                                } else {
-
-                                    if($select_attribute == 'video'){
-                                        $video_link =  $image_data["image_link"].'@@'.$image_data["webimage"];
-                                        array_push($data_arr, $data_sku[0]);
-                                        $data_p = array("sku" => $data_sku[0], "url" => $video_link);
-                                        array_push($data_val_arr, $data_p);
-                                    }else{
-                                        $doc_name = $data_value["name"];
-                                        $doc_name_with_space = preg_replace("/[^a-zA-Z]+/", "-", $doc_name);
-                                        $doc_link =  $image_data["image_link"] . '@@' . $doc_name_with_space;
-                                        array_push($data_arr, $data_sku[0]);
-                                        $data_p = array("sku" => $data_sku[0], "url" => $doc_link);
-                                        array_push($data_val_arr, $data_p);
-                                    }
-                                }
-                            }
+                        } else {
+                            $doc_name = $data_value["name"];
+                            $doc_name_with_space = preg_replace("/[^a-zA-Z]+/", "-", $doc_name);
+                            $doc_link =  $image_data["image_link"] . '@@' . $doc_name_with_space;
+                            array_push($data_arr, $data_sku[0]);
+                            $data_p = ["sku" => $data_sku[0], "url" => $doc_link];
+                            array_push($data_val_arr, $data_p);
                         }
+                    
                     }
                 }
             }
         }
+        $this->getProcessItem($data_arr, $data_val_arr);
+    }
+    /**
+     * Get Process Item
+     *
+     * @param array $data_arr
+     * @param array $data_val_arr
+     */
+    public function getProcessItem($data_arr, $data_val_arr)
+    {
+        $result = $this->resultJsonFactory->create();
         if (count($data_arr) > 0) {
             foreach ($data_arr as $key => $temp) {
                 $temp_arr[$temp][] = $data_val_arr[$key]["url"];
             }
             foreach ($temp_arr as $product_sku_key => $image_value) {
                 $img_json = implode(" \n", $image_value);
-                $result_data = $this->update_image_attribute($img_json, $product_sku_key);
+                $this->getUpdateImage($img_json, $product_sku_key);
             }
-            return $result_data;
         } else {
             $result_data = $result->setData(['status' => 0, 'message' => 'No Data Found...']);
             return $result_data;
         }
     }
-
-    public function update_image_attribute($img_json, $product_sku_key)
+    /**
+     * Upate Item
+     *
+     * @return $this
+     * @param string $img_json
+     * @param string $product_sku_key
+     */
+    public function getUpdateImage($img_json, $product_sku_key)
     {
         $result = $this->resultJsonFactory->create();
         $select_attribute = $this->getRequest()->getParam('select_attribute');
         $model = $this->_byndersycData->create();
 
-
         try {
-
-            $new_image_push = array();
-            $new_video_push = array();
-            $new_doc_push = array();
-            $url_explode =  $url_video_explode =  $url_doc_explode = Null;
-            $url_filter = $url_video_filter =  $url_video_filter = Null;
-            $media_explode = $media_video_explode = $media_doc_explode = Null;
             $storeId = $this->storeManagerInterface->getStore()->getId();
-
+            $byndeimageconfig = $this->datahelper->byndeimageconfig();
+            $img_roles = explode(",", $byndeimageconfig);
             $_product = $this->_productRepository->get($product_sku_key);
-
             $product_ids = $_product->getId();
-            $base_url = $this->storeManagerInterface->getStore()->getBaseUrl();
-            $product_url_key = $_product->getUrlKey();
-            $product_url = $base_url . $product_url_key . '.html';
-
             $image_value = $_product->getBynderMultiImg();
             $doc_value = $_product->getBynderDocument();
-            $video_value = $_product->getBynderVideos();
-
             if ($select_attribute == "image") {
-
                 if (!empty($image_value)) {
-
-                    $old_image_array = explode(" ", $image_value);
-                    $trimmed_array = array_map('trim', $old_image_array);
-                    $trimmed_array_filter = array_filter($trimmed_array);
                     $new_image_array = explode(" \n", $img_json);
-                    $trimmed_new_array = array_map('trim', $new_image_array);
-                    $diff_image_array = array_diff($trimmed_new_array, $trimmed_array_filter);
-                    $image_merge = array_merge($diff_image_array, $trimmed_array_filter);
-                    $new_image_value = implode(" ", $image_merge);
-
-                    $api_call = $this->datahelper->check_bynder();
-                    $api_response = json_decode($api_call, true);
-                    if (isset($api_response['status']) == 1) {
-                        $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $image_merge);
+                    $all_item_url = [];
+                    $item_old_value = json_decode($image_value, true);
+                    if (count($item_old_value) > 0) {
+                        foreach ($item_old_value as $img) {
+                            $all_item_url[] = $img['item_url'];
+                        }
                     }
-
-
-                    $updateAttributes['bynder_multi_img'] = $new_image_value . " \n";
-                    $this->productAction->updateAttributes([$product_ids], $updateAttributes, $storeId);
-
-                    foreach ($diff_image_array as $value) {
-                        $url_explode = explode("https://", $value);
-                        $url_filter = array_filter($url_explode);
-                        foreach ($url_filter as $media_value) {
-                            $media_explode = explode("/", $media_value);
-                            $data_value_1 = array(
+                    foreach ($new_image_array as $image_value) {
+                        $image_detail = [];
+                        $item_url = explode("?", $image_value);
+                        $media_image_explode = explode("/", $item_url[0]);
+                        if (!in_array($item_url[0], $all_item_url)) {
+                            $image_detail[] = [
+                                "item_url" => $item_url[0],
+                                "image_role" => $img_roles,
+                                "item_type" => 'IMAGE',
+                                "thum_url" => $item_url[0]
+                            ];
+                            $data_image_data = [
                                 'sku' => $product_sku_key,
-                                'bynder_data' => $value,
+                                'bynder_data' => $item_url[0],
                                 'bynder_data_type' => '1',
-                                'media_id' => $media_explode[3],
+                                'media_id' => $media_image_explode[5],
                                 'remove_for_magento' => '1',
                                 'added_on_cron_compactview' => '1',
                                 'added_date' => time()
-                            );
-                            $model->setData($data_value_1);
+                            ];
+                            $model->setData($data_image_data);
                             $model->save();
                         }
                     }
+                    $array_merge = array_merge($item_old_value, $image_detail);
+                    foreach ($array_merge as $img) {
+                        $type[] = $img['item_type'];
+                    }
+                    if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
+                        $flag = 1;
+                    } elseif (in_array("IMAGE", $type)) {
+                        $flag = 2;
+                    } elseif (in_array("VIDEO", $type)) {
+                        $flag = 3;
+                    }
+                    $new_value_array =json_encode($array_merge, true);
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_multi_img' => $new_value_array],
+                        $storeId
+                    );
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_isMain' => $flag],
+                        $storeId
+                    );
+                    
                 } else {
                     $new_image_array = explode(" \n", $img_json);
-                    $new_image_value = implode(" \n", $new_image_array);
-
-                    $api_call = $this->datahelper->check_bynder();
-                    $api_response = json_decode($api_call, true);
-                    if (isset($api_response['status']) == 1) {
-                        $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $new_image_value);
-                    }
-
-                    $updateAttributes['bynder_multi_img'] = $new_image_value . " \n";
-                    $this->productAction->updateAttributes([$product_ids], $updateAttributes, $storeId);
-
-                    foreach ($new_image_array as $value) {
-                        $url_explode = explode("https://", $value);
-                        $url_filter = array_filter($url_explode);
-                        foreach ($url_filter as $media_value) {
-                            $media_explode = explode("/", $media_value);
-                            $data_value_1 = array(
+                    $image_detail = [];
+                    foreach ($new_image_array as $image_value) {
+                        $item_url = explode("?", $image_value);
+                        $media_image_explode = explode("/", $item_url[0]);
+                        
+                            $image_detail[] = [
+                                "item_url" => $item_url[0],
+                                "image_role" => $img_roles,
+                                "item_type" => 'IMAGE',
+                                "thum_url" => $item_url[0]
+                            ];
+                            $data_image_data = [
                                 'sku' => $product_sku_key,
-                                'bynder_data' => $value,
+                                'bynder_data' => $item_url[0],
                                 'bynder_data_type' => '1',
-                                'media_id' => $media_explode[3],
+                                'media_id' => $media_image_explode[5],
                                 'remove_for_magento' => '1',
                                 'added_on_cron_compactview' => '1',
                                 'added_date' => time()
-                            );
-                            $model->setData($data_value_1);
+                            ];
+                            $model->setData($data_image_data);
                             $model->save();
-                        }
                     }
+                    foreach ($image_detail as $img) {
+                        $type[] = $img['item_type'];
+                    }
+                    if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
+                        $flag = 1;
+                    } elseif (in_array("IMAGE", $type)) {
+                        $flag = 2;
+                    } elseif (in_array("VIDEO", $type)) {
+                        $flag = 3;
+                    }
+                    $new_value_array = json_encode($image_detail, true);
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_multi_img' => $new_value_array],
+                        $storeId
+                    );
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_isMain' => $flag],
+                        $storeId
+                    );
+                    
                 }
             } elseif ($select_attribute == "video") {
-
-
-                if (!empty($video_value)) {
-
-                    $old_video_array = explode(" ", $video_value);
-                    $trimmed_video_array = array_map('trim', $old_video_array);
-                    $trimmed_video_array_filter = array_filter($trimmed_video_array);
-
+                if (!empty($image_value)) {
                     $new_video_array = explode(" \n", $img_json);
-                    $trimmed_new_video_array = array_map('trim', $new_video_array);
-
-                    $diff_video_array = array_diff($trimmed_new_video_array, $trimmed_video_array_filter);
-
-                    $video_merge = array_merge($diff_video_array, $trimmed_video_array_filter);
-
-                    $new_video_value = implode(" \n", $video_merge);
-
-                    $api_call = $this->datahelper->check_bynder();
-                    $api_response = json_decode($api_call, true);
-                    if (isset($api_response['status']) == 1) {
-                        $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $video_merge);
+                    $old_value_array = json_decode($image_value, true);
+                    $old_item_url = [];
+                    if (!empty($old_value_array)) {
+                        foreach ($old_value_array as $value) {
+                            $old_item_url[] = $value['item_url'];
+                        }
                     }
-
-                    $updateAttributes['bynder_videos'] = $new_video_value . " \n";
-                    $this->productAction->updateAttributes([$product_ids], $updateAttributes, $storeId);
-
-                    foreach ($diff_video_array as $new_data_video_value) {
-                        $url_video_explode = explode("https://", $new_data_video_value);
-                        $url_video_filter = array_filter($url_video_explode);
-                        foreach ($url_video_filter as $media_video_value) {
-                            $media_video_explode = explode("/", $media_video_value);
-                            $data_video_data = array(
+                    foreach ($new_video_array as $video_value) {
+                        $item_url = explode("?", $video_value);
+                        $thum_url = explode("@@", $video_value);
+                        $media_video_explode = explode("/", $item_url[0]);
+                        if (!in_array($item_url[0], $old_item_url)) {
+                            $video_detail[] = [
+                                "item_url" => $item_url[0],
+                                "image_role" => null,
+                                "item_type" => 'VIDEO',
+                                "thum_url" => $thum_url[1]
+                            ];
+                            $data_video_data = [
                                 'sku' => $product_sku_key,
-                                'bynder_data' => $new_data_video_value,
+                                'bynder_data' => $item_url[0],
                                 'bynder_data_type' => '3',
-                                'media_id' => $media_video_explode[2],
+                                'media_id' => $media_video_explode[5],
                                 'remove_for_magento' => '1',
                                 'added_on_cron_compactview' => '1',
                                 'added_date' => time()
-                            );
+                            ];
                             $model->setData($data_video_data);
                             $model->save();
                         }
                     }
+                    if (!empty($old_value_array)) {
+                        $array_merge = array_merge($old_value_array, $video_detail);
+                        /*  IMAGE & VIDEO == 1
+                            IMAGE == 2
+                            VIDEO == 3 */
+                        foreach ($array_merge as $img) {
+                         
+                            $type[] = $img['item_type'];
+                        }
+                        if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
+                            $flag = 1;
+                        } elseif (in_array("IMAGE", $type)) {
+                            $flag = 2;
+                        } elseif (in_array("VIDEO", $type)) {
+                            $flag = 3;
+                        }
+                    }
+                    $new_value_array = json_encode($array_merge, true);
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_multi_img' => $new_value_array],
+                        $storeId
+                    );
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_isMain' => $flag],
+                        $storeId
+                    );
                 } else {
                     $new_video_array = explode(" \n", $img_json);
-                    $new_video_value = implode(" \n", $new_video_array);
-
-                    $updateAttributes['bynder_videos'] = $new_video_value . " \n";
-
-                    $api_call = $this->datahelper->check_bynder();
-                    $api_response = json_decode($api_call, true);
-                    if (isset($api_response['status']) == 1) {
-                        $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $new_video_value);
-                    }
-
-
-                    $this->productAction->updateAttributes([$product_ids], $updateAttributes, $storeId);
-
-                    foreach ($new_video_array as $new_data_video_value) {
-                        $url_video_explode = explode("https://", $new_data_video_value);
-                        $url_video_filter = array_filter($url_video_explode);
-                        foreach ($url_video_filter as $media_video_value) {
-                            $media_video_explode = explode("/", $media_video_value);
-                            $data_video_data = array(
+                    $video_detail = [];
+                    foreach ($new_video_array as $video_value) {
+                        $item_url = explode("?", $video_value);
+                        $thum_url = explode("@@", $video_value);
+                        $media_video_explode = explode("/", $item_url[0]);
+                        
+                            $video_detail[] = [
+                                "item_url" => $item_url[0],
+                                "image_role" => null,
+                                "item_type" => 'VIDEO',
+                                "thum_url" => $thum_url[1]
+                            ];
+                            $data_video_data = [
                                 'sku' => $product_sku_key,
-                                'bynder_data' => $new_data_video_value,
+                                'bynder_data' => $item_url[0],
                                 'bynder_data_type' => '3',
-                                'media_id' => $media_video_explode[2],
+                                'media_id' => $media_video_explode[5],
                                 'remove_for_magento' => '1',
                                 'added_on_cron_compactview' => '1',
                                 'added_date' => time()
-                            );
+                            ];
                             $model->setData($data_video_data);
                             $model->save();
-                        }
+                    
                     }
+                    foreach ($video_detail as $img) {
+                        $type[] = $img['item_type'];
+                    }
+                    if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
+                        $flag = 1;
+                    } elseif (in_array("IMAGE", $type)) {
+                        $flag = 2;
+                    } elseif (in_array("VIDEO", $type)) {
+                        $flag = 3;
+                    }
+                    $new_value_array =json_encode($video_detail, true);
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_multi_img' => $new_value_array],
+                        $storeId
+                    );
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_isMain' => $flag],
+                        $storeId
+                    );
                 }
             } else {
 
-                if (!empty($doc_value)) {
-
-                    $old_doc_array = explode(" ", $doc_value);
-                    $trimmed_doc_array = array_map('trim', $old_doc_array);
-                    $trimmed_doc_array_filter = array_filter($trimmed_doc_array);
-
+                if (empty($doc_value)) {
                     $new_doc_array = explode(" \n", $img_json);
-                    $trimmed_new_doc_array = array_map('trim', $new_doc_array);
-
-                    $diff_doc_array = array_diff($trimmed_new_doc_array, $trimmed_doc_array_filter);
-
-                    $doc_merge = array_merge($diff_doc_array, $trimmed_doc_array_filter);
-
-                    $new_doc_value = implode(" \n", $doc_merge);
-
-                    $api_call = $this->datahelper->check_bynder();
-                    $api_response = json_decode($api_call, true);
-                    if (isset($api_response['status']) == 1) {
-                        $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $doc_merge);
-                    }
-
-
-                    $updateAttributes['bynder_document'] = $new_doc_value . " \n";
-                    $this->productAction->updateAttributes([$product_ids], $updateAttributes, $storeId);
-
-                    foreach ($diff_doc_array as $doc_data_value) {
-                        $url_doc_explode = explode("https://", $doc_data_value);
-                        $url_doc_filter = array_filter($url_doc_explode);
-                        foreach ($url_doc_filter as $media_doc_value) {
-                            $media_doc_explode = explode("/", $media_doc_value);
-                            $data_doc_value = array(
-                                'sku' => $product_sku_key,
-                                'bynder_data' => $doc_value,
-                                'bynder_data_type' => '2',
-                                'media_id' => $media_doc_explode[2],
-                                'remove_for_magento' => '1',
-                                'added_on_cron_compactview' => '1',
-                                'added_date' => time()
-                            );
-
-                            $model->setData($data_doc_value);
-                            $model->save();
-                        }
-                    }
-                } else {
-                    $new_doc_array = explode(" \n", $img_json);
-
-                    $new_doc_value = implode(" \n", $new_doc_array);
-
-                    $api_call = $this->datahelper->check_bynder();
-                    $api_response = json_decode($api_call, true);
-                    if (isset($api_response['status']) == 1) {
-                        $assets_track = $this->datahelper->get_bynder_changemetadata_assets($product_url, $new_doc_value);
-                    }
-
-                    $updateAttributes['bynder_document'] = $new_doc_value . " \n";
-                    $this->productAction->updateAttributes([$product_ids], $updateAttributes, $storeId);
-
+                    $doc_detail = [];
                     foreach ($new_doc_array as $doc_value) {
-                        $url_doc_explode = explode("https://", $doc_value);
-                        $url_doc_filter = array_filter($url_doc_explode);
-                        foreach ($url_doc_filter as $media_doc_value) {
-                            $media_doc_explode = explode("/", $media_doc_value);
-                            $data_doc_value = array(
-                                'sku' => $product_sku_key,
-                                'bynder_data' => $doc_value,
-                                'bynder_data_type' => '2',
-                                'media_id' => $media_doc_explode[2],
-                                'remove_for_magento' => '1',
-                                'added_on_cron_compactview' => '1',
-                                'added_date' => time()
-                            );
-
-                            $model->setData($data_doc_value);
-                            $model->save();
-                        }
+                        $item_url = explode("?", $doc_value);
+                        $media_doc_explode = explode("/", $item_url[0]);
+                        $doc_detail[] = [
+                            "item_url" => $item_url[0],
+                            "item_type" => 'DOCUMENT',
+                        ];
+                        $data_doc_value = [
+                            'sku' => $product_sku_key,
+                            'bynder_data' => $item_url[0],
+                            'bynder_data_type' => '2',
+                            'media_id' => $media_doc_explode[4],
+                            'remove_for_magento' => '1',
+                            'added_on_cron_compactview' => '1',
+                            'added_date' => time()
+                        ];
+                        $model->setData($data_doc_value);
+                        $model->save();
                     }
+                    $new_value_array =json_encode($doc_detail, true);
+                    $this->productAction->updateAttributes(
+                        [$product_ids],
+                        ['bynder_document' => $new_value_array],
+                        $storeId
+                    );
                 }
             }
-
-
             return $result->setData(['status' => 1, 'message' => ' Data Sync Successfully..!']);
         } catch (\Exception $e) {
             return $result->setData(['message' => $e->getMessage()]);

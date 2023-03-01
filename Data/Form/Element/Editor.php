@@ -16,18 +16,22 @@ use Magento\Framework\Data\Form\Element\Factory;
 use Magento\Framework\Data\Form\Element\CollectionFactory;
 use Magento\Store\Model\StoreManagerInterface;
 
-/**
- * Class Editor
- *
- * @package DamConsultants\Bynder\Data\Form\Element
- */
-class Editor extends \Magento\Framework\Data\Form\Element\Editor {
+class Editor extends \Magento\Framework\Data\Form\Element\Editor
+{
 
     /**
      * @var \Magento\Framework\Serialize\Serializer\Json
      */
     private $serializer;
+
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface
+     */
     protected $storeManager;
+
+    /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
     protected $scopeConfig;
 
     /**
@@ -35,8 +39,10 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
      * @param Factory $factoryElement
      * @param CollectionFactory $factoryCollection
      * @param Escaper $escaper
-     * @param array $data
      * @param \Magento\Framework\Serialize\Serializer\Json|null $serializer
+     * @param StoreManagerInterface $storeManager
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param array $data
      * @throws \RuntimeException
      */
     public function __construct(
@@ -64,6 +70,11 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
         $this->scopeConfig = $scopeConfig;
     }
 
+    /**
+     * Get Configs
+     *
+     * @param string $path
+     */
     public function getConfigs($path)
     {
         return $this->scopeConfig->getValue(
@@ -109,7 +120,6 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
 
     /**
      * Fetch config options from plugin.
-     * If $key is passed, return only that option key's value
      *
      * @param string $pluginName
      * @param string|null $key
@@ -200,7 +210,7 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
                     $this->getClass() .
                     '" ' .
                     $this->serialize(
-                            $this->getHtmlAttributes()
+                        $this->getHtmlAttributes()
                     ) .
                     ' >' .
                     $this->getEscapedValue() .
@@ -274,7 +284,7 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
     protected function _getToggleButtonHtml($visible = true)
     {
         $html = $this->_getButtonHtml(
-                [
+            [
                     'title' => $this->translate('Show / Hide Editor...'),
                     'class' => 'action-show-hide',
                     'style' => $visible ? '' : 'display:none',
@@ -299,7 +309,7 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
         /* Button to widget insertion window */
         if ($this->getConfig('add_widgets')) {
             $buttonsHtml .= $this->_getButtonHtml(
-                    [
+                [
                         'title' => $this->translate('Insert Widget...'),
                         'onclick' => "widgetTools.openDialog('"
                         . $this->getPluginConfigOptions('magentowidget', 'window_url')
@@ -313,7 +323,7 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
         /* Button to media images insertion window */
         if ($this->getConfig('add_images')) {
             $buttonsHtml .= $this->_getButtonHtml(
-                    [
+                [
                         'title' => $this->translate('Insert Image...'),
                         'onclick' => "MediabrowserUtility.openDialog('"
                         . $this->getConfig('files_browser_window_url')
@@ -347,7 +357,7 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
         if ($this->getConfig('add_images')) {
             $x = $this->getConfigs("web/secure/base_url");
             $buttonsHtml .= $this->_getButtonHtml(
-                    [
+                [
                         'title' => $this->translate('Bynder Media...'),
                         'onclick' => "javascript:void(0)",
                         'class' => 'action-add-widget plugin cms_bynder_action_btn ' . $this->getBaseUrl(),
@@ -357,11 +367,11 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
                     ]
             );
         }
-
-
         return $buttonsHtml;
     }
-
+    /**
+     * Get Base Url
+     */
     public function getBaseUrl()
     {
         $storeUrl = $this->storeManager->getStore()->getBaseUrl();
@@ -532,7 +542,8 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
     protected function isToggleButtonVisible()
     {
         return !$this->getConfig()->hasData(
-        'toggle_button') || $this->getConfig('toggle_button');
+            'toggle_button'
+        ) || $this->getConfig('toggle_button');
     }
 
     /**
@@ -605,5 +616,4 @@ class Editor extends \Magento\Framework\Data\Form\Element\Editor {
         $suffix = $this->getConfig('dynamic_id') ? '${ $.wysiwygUniqueSuffix }' : '';
         return parent::getHtmlId() . $suffix;
     }
-
 }

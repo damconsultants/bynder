@@ -1,5 +1,7 @@
 <?php
+
 namespace DamConsultants\Bynder\Model\Config\Source;
+
 class Select implements \Magento\Framework\Data\OptionSourceInterface
 {
     /**

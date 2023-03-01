@@ -4,20 +4,16 @@ namespace DamConsultants\Bynder\Block\System\Config;
 
 use Magento\Config\Block\System\Config\Form\Field;
 use Magento\Backend\Block\Template\Context;
-use Magento\Framework\Data\Form\Element\AbstractElement;
-use \Magento\Store\Model\StoreManagerInterface;
 
 class Checkbox extends Field
 {
+    /**
+     * Block template.
+     *
+     * @var string
+     */
     protected $_template = 'DamConsultants_Bynder::system/config/checkbox.phtml';
-    const CONFIG_PATH = 'byndersyncdata/bynder_sync_data/checkbox';
 
-    public function __construct(
-        \Magento\Backend\Block\Template\Context $context,
-        array $data = []
-    ) {
-        parent::__construct($context, $data);
-    }
     /**
      * Retrieve element HTML markup.
      *
@@ -32,39 +28,50 @@ class Checkbox extends Field
         return $this->_toHtml();
     }
     
+    /**
+     * Getvalue.
+     *
+     * @return $this
+     */
     public function getValues()
     {
         $values = [];
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        foreach ($objectManager->create('DamConsultants\Bynder\Model\Config\Source\Checkbox')->toOptionArray() as $value) {
+        $valuess = $objectManager->create(\DamConsultants\Bynder\Model\Config\Source\Checkbox::class)->toOptionArray();
+        foreach ($valuess as $value) {
             $values[$value['value']] = $value['label'];
         }
         return $values;
     }
+
     /**
-     * 
-     * @param  $name 
-     * @return boolean
+     * GetNPrefix.
+     *
+     * @return $this
      */
-  /*  public function getIsChecked($name)
+    public function getNPrefix()
     {
-        return in_array($name, $this->getCheckedValues());
-    } */
+        return $this->getNamePrefix();
+    }
+
     /**
-     * 
-     *get the checked value from config
+     * GetId.
+     *
+     * @return $this
      */
-    /*public function getCheckedValues()
+    public function getId()
     {
-        /*if (is_null($this->_values)) {
-            $data = $this->getConfigData();
-            if (isset($data[self::CONFIG_PATH])) {
-                $data = $data[self::CONFIG_PATH];
-            } else {
-                $data = '';
-            }
-            $this->_values = explode(',', $data);
-        }
-        return 0;
-    } */
+        return $this->getHtmlId();
+    }
+
+    /**
+     * GetCheck.
+     *
+     * @return $this
+     * @param string $name
+     */
+    public function getCheck($name)
+    {
+        return $this->getIsChecked($name);
+    }
 }

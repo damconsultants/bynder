@@ -2,26 +2,19 @@
 $product = $block->getProduct();
 
 $document_text = $product->getData('bynder_document');
-$document_array = explode("\n", $document_text);
 
+$document_array = json_decode($document_text, true);
+//echo "<pre>"; print_r($document_array); die;
 $html = "";
-if (is_array($document_array) == 1 && COUNT($document_array) != 0) {
-    $document_array = array_filter($document_array);
-    foreach ($document_array AS $v) {
-        $v = trim($v);
-        if (!empty($v)) {
-            $url_array = explode("@@", $v);
-            /* if(COUNT($url_array) == 2) { */
-            if (isset($url_array[0]) && isset($url_array[1])) {
-                $link = $url_array[0];
-                $label = $url_array[1];
-                $html .= '<li><a href="' . $link . '">' . $label . '</a></li>';
-            }
-        }
+if (!empty($document_array)) {
+    foreach ($document_array as $doc) {
+        $lable = explode("/", $doc['item_url']);
+        $html .= '<li><a href="' . $doc['item_url'] . '">' . $lable[6] . '</a></li>';
+        
     }
 }
 ?>
 
 <ul>
-    <?= $html ?>
+    <?= /* @noEscape */ $html ?>
 </ul>

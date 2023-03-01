@@ -16,7 +16,6 @@ use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 
-
 class AddBynderAttribute implements DataPatchInterface
 {
     /** @var ModuleDataSetupInterface */
@@ -26,22 +25,20 @@ class AddBynderAttribute implements DataPatchInterface
     private $eavSetupFactory;
 
     /**
-        * @param ModuleDataSetupInterface $moduleDataSetup
-        * @param EavSetupFactory $eavSetupFactory
-        */
+     * @param ModuleDataSetupInterface $moduleDataSetup
+     * @param EavSetupFactory $eavSetupFactory
+     */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
         EavSetupFactory $eavSetupFactory
-        
     ) {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->eavSetupFactory = $eavSetupFactory;
-        
     }
 
     /**
-        * {@inheritdoc}
-        */
+     * @inheritdoc
+     */
     public function apply()
     {
         /** @var EavSetup $eavSetup */
@@ -55,7 +52,7 @@ class AddBynderAttribute implements DataPatchInterface
             'sort_order' => 200,
             'backend' => '',
             'frontend' => '',
-            'label' => 'Only Bynder Multi Image ',
+            'label' => 'Bynder Image and Video',
             'input' => 'textarea',
             'class' => '',
             'source' => '',
@@ -68,7 +65,7 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'visible_on_front' => false,
-            'used_in_product_listing' => false,
+            'used_in_product_listing' => true,
             'unique' => false,
             'apply_to' => ''
         ]);
@@ -80,7 +77,7 @@ class AddBynderAttribute implements DataPatchInterface
             'backend' => '',
             'frontend' => '',
             'sort_order' => 210,
-            'label' => 'Only Bynder Document',
+            'label' => 'Bynder Document',
             'input' => 'textarea',
             'class' => '',
             'source' => '',
@@ -93,31 +90,7 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'visible_on_front' => false,
-            'used_in_product_listing' => false,
-            'apply_to' => ''
-        ]);
-
-        $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_videos');
-        $eavSetup->addAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_videos', [
-            'group' => 'Product Details',
-            'type' => 'text',
-            'backend' => '',
-            'frontend' => '',
-            'sort_order' => 220,
-            'label' => 'Only Bynder Videos',
-            'input' => 'textarea',
-            'class' => '',
-            'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
-            'visible' => true,
-            'required' => false,
-            'user_defined' => false,
-            'default' => '',
-            'searchable' => false,
-            'filterable' => false,
-            'comparable' => false,
-            'unique' => false,
-            'visible_on_front' => false,
-            'used_in_product_listing' => false,
+            'used_in_product_listing' => true,
             'apply_to' => ''
         ]);
 
@@ -128,10 +101,10 @@ class AddBynderAttribute implements DataPatchInterface
             'sort_order' => 230,
             'backend' => '',
             'frontend' => '',
-            'label' => 'Use Both Image',
+            'label' => 'Use Bynder Image as well as Local Folder Image',
             'input' => 'boolean',
             'class' => '',
-            'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+            'source' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class,
             'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
             'visible' => true,
             'required' => false,
@@ -142,10 +115,10 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'visible_on_front' => false,
-            'used_in_product_listing' => false,
+            'used_in_product_listing' => true,
             'unique' => false,
             'apply_to' => ''
-            
+            /* 'attribute_set_id' => '4' */
         ]);
 
         $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_image_import');
@@ -155,10 +128,10 @@ class AddBynderAttribute implements DataPatchInterface
             'sort_order' => 240,
             'backend' => '',
             'frontend' => '',
-            'label' => 'Bynder Image Import',
+            'label' => 'Import Bynder Image into the local Folder',
             'input' => 'boolean',
             'class' => '',
-            'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+            'source' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class,
             'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
             'visible' => true,
             'required' => false,
@@ -169,10 +142,10 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'visible_on_front' => false,
-            'used_in_product_listing' => false,
+            'used_in_product_listing' => true,
             'unique' => false,
             'apply_to' => ''
-            
+            /* 'attribute_set_id' => '4' */
         ]);
 
         $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'use_bynder_cdn');
@@ -182,10 +155,10 @@ class AddBynderAttribute implements DataPatchInterface
             'sort_order' => 250,
             'backend' => '',
             'frontend' => '',
-            'label' => 'Use Only Bynder CDN',
+            'label' => 'Use only Bynder Image on Front side',
             'input' => 'boolean',
             'class' => '',
-            'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+            'source' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class,
             'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
             'visible' => true,
             'required' => false,
@@ -196,34 +169,36 @@ class AddBynderAttribute implements DataPatchInterface
             'filterable' => false,
             'comparable' => false,
             'visible_on_front' => false,
-            'used_in_product_listing' => false,
+            'used_in_product_listing' => true,
             'unique' => false,
             'apply_to' => ''
-            
+            /* 'attribute_set_id' => '4' */
         ]);
 
         $this->moduleDataSetup->getConnection()->endSetup();
-
     }
 
     /**
-        * {@inheritdoc}
-        */
+     * @inheritdoc
+     */
     public static function getDependencies()
     {
         return [];
     }
 
     /**
-        * {@inheritdoc}
-        */
+     * @inheritdoc
+     */
     public function getAliases()
     {
         return [];
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
-   
+   /* public static function getVersion()
+    {
+        return '2.0.1';
+    }*/
 }

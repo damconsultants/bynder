@@ -7,14 +7,30 @@ use Magento\Framework\Event\ObserverInterface;
 
 class Categorysaveafter implements ObserverInterface
 {
+    /**
+     * @var $helper
+     */
     protected $helper;
+    /**
+     * @var $cmsHelper
+     */
     protected $cmsHelper;
+
+    /**
+     * Categorysaveafter
+     * @param \DamConsultants\Bynder\Helper\Data $dataHelper
+     */
     public function __construct(
         \DamConsultants\Bynder\Helper\Data $dataHelper
     ) {
         $this->_datahelper = $dataHelper;
     }
-
+    /**
+     * Execute
+     *
+     * @return $this
+     * @param \Magento\Framework\Event\Observer $observer
+     */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
         $category = $observer->getEvent()->getData('category');
@@ -22,29 +38,26 @@ class Categorysaveafter implements ObserverInterface
         $BaseUrl = $this->_datahelper->getbaseurl();
         $categoryUrl = $BaseUrl . $url . '.html';
 
-        $arr = array(
+        $arr = [
             $category->getDescription()
-        );
+        ];
 
         $url_data = [];
-
         $str = implode(" ", $arr);
         $image_arr = explode(" ", $str);
 
         foreach ($image_arr as $a) {
             preg_match('@src="([^"]+)"@', $a, $match);
             $src = array_pop($match);
-            $img_arr = explode('?', $src);
+            $img_arr = explode('?', ''.$src);
             $url_data[] = $img_arr[0];
         }
-
-
         if (!empty($url_data)) {
             $category_description = array_filter($url_data);
-            $api_call = $this->_datahelper->check_bynder();
-            $api_response = json_decode($api_call,true);
+            $api_call = $this->_datahelper->getCheckBynder();
+            $api_response = json_decode($api_call, true);
             if (isset($api_response['status']) == 1) {
-                $assets = $this->_datahelper->bynder_data_cms_page($categoryUrl, $category_description);
+                $assets = $this->_datahelper->getBynderDataCmsPage($categoryUrl, $category_description);
             }
         }
     }

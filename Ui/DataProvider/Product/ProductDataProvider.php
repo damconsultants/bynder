@@ -7,6 +7,14 @@ use DamConsultants\Bynder\Model\ResourceModel\Collection\BynderSycDataCollection
 class ProductDataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 {
 
+    /**
+     * @param BynderSycDataCollectionFactory $BynderSycDataCollectionFactory
+     * @param string $name
+     * @param string $primaryFieldName
+     * @param string $requestFieldName
+     * @param array $meta
+     * @param array $data
+     */
     public function __construct(
         BynderSycDataCollectionFactory $BynderSycDataCollectionFactory,
         $name,
@@ -24,7 +32,5 @@ class ProductDataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
             $data
         );
         return $this->collection = $BynderSycDataCollectionFactory->create();
-                           
-        
     }
 }

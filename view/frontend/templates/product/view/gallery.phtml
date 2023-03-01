@@ -14,7 +14,7 @@
 $images = $block->getGalleryImages()->getItems();
 $mainImage = current(array_filter($images, function ($img) use ($block) {
             return $block->isMainImage($img);
-        }));
+}));
 
 if (!empty($images) && empty($mainImage)) {
     $mainImage = $block->getGalleryImages()->getFirstItem();
@@ -28,8 +28,8 @@ $mainImageData = $mainImage ?
 
 $img_url = $mainImageData;
 $one_img = $block->getSingleImage();
-if(!empty($one_img) && $one_img !='0') {
-	$img_url = $one_img;
+if (!empty($one_img) && $one_img !='0') {
+    $img_url = $one_img;
 }
 ?>
 
@@ -44,16 +44,16 @@ if(!empty($one_img) && $one_img !='0') {
 
 <script type="text/x-magento-init">
     {
-		"[data-gallery-role=gallery-placeholder]": {
-			"mage/gallery/gallery": {
-				"mixins":["magnifier/magnify"],
-				"magnifierOpts": <?= /* @noEscape */ $block->getMagnifier() ?>,
-				"data": <?= /* @noEscape */ $block->getGalleryImagesJson() ?>,
-				"options": <?= /* @noEscape */ $block->getGalleryOptions()->getOptionsJson() ?>,
-				"fullscreen": <?= /* @noEscape */ $block->getGalleryOptions()->getFSOptionsJson() ?>,
-				"breakpoints": <?= /* @noEscape */ $block->getBreakpoints() ?>
-			}
-		}
+        "[data-gallery-role=gallery-placeholder]": {
+            "mage/gallery/gallery": {
+                "mixins":["magnifier/magnify"],
+                "magnifierOpts": <?= /* @noEscape */ $block->getMagnifier() ?>,
+                "data": <?= /* @noEscape */ $block->getGalleryImagesJson() ?>,
+                "options": <?= /* @noEscape */ $block->getGalleryOptions()->getOptionsJson() ?>,
+                "fullscreen": <?= /* @noEscape */ $block->getGalleryOptions()->getFSOptionsJson() ?>,
+                "breakpoints": <?= /* @noEscape */ $block->getBreakpoints() ?>
+            }
+        }
     }
 </script>
 
@@ -66,23 +66,15 @@ if(!empty($one_img) && $one_img !='0') {
             var fotorama = $fotorama.data('fotorama');
             $fotorama.on('fotorama:load', function fotorama_onLoad(e, fotorama, extra) {
                 if (extra.frame.type === 'iframe') {
-                    extra.frame.$stageFrame.html('<iframe align="middle" type="text/html" width="100%" height="100%" src="' + extra.frame.src + '" frameborder="0" scrolling="no" allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen></iframe>');
+                    extra.frame.$stageFrame.html(
+                        '<iframe align="middle" type="text/html"'+
+                        'width="100%" height="100%" src="' + extra.frame.src + '"'+
+                        'frameborder="0" scrolling="no"'+
+                        'allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen>'+
+                        '</iframe>'
+                        );
                 }
             });
-			setTimeout(function(){
-				var gallery_json = <?= $block->getGalleryVideoJson() ?>;
-				if(gallery_json != "") {
-					var json_html = [];
-					jQuery.each(gallery_json, function(index,item) {
-						fotorama.push({
-							thumb: item.thumb,
-							'src': item.src,
-							type: item.type,
-							caption: item.caption
-						});
-					});
-				}
-			}, 300);
         });
 
     });
