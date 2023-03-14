@@ -1,14 +1,14 @@
 <?xml version="1.0" ?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
 	<group id="default">
-		<!-- <job instance="DamConsultants\Bynder\Cron\FeatchNullDataToMagento" method="execute" name="damConsultants_bynder_fetach_sku_null_for_magento">
+		<job instance="DamConsultants\Bynder\Cron\FeatchNullDataToMagento" method="execute" name="damConsultants_bynder_fetach_sku_null_for_magento">
 			<config_path>crontab/default/jobs/damConsultants_bynder_fetach_sku_null_for_magento/schedule/cron_expr</config_path>
-		</job> -->
-		<!-- <job instance="DamConsultants\Bynder\Cron\AutoAddFormMagento" method="execute" name="damConsultants_bynder_auto_sku_add_magento">
+		</job>
+		 <job instance="DamConsultants\Bynder\Cron\AutoAddFormMagento" method="execute" name="damConsultants_bynder_auto_sku_add_magento">
 			<config_path>crontab/default/jobs/damConsultants_bynder_auto_sku_add_magento/schedule/cron_expr</config_path>
-		</job> -->
-		<!-- <job instance="DamConsultants\Bynder\Cron\AutoReplaceFormMagento" method="execute" name="damConsultants_bynder_auto_sku_replace_magento">
+		</job>
+		<job instance="DamConsultants\Bynder\Cron\AutoReplaceFormMagento" method="execute" name="damConsultants_bynder_auto_sku_replace_magento">
 			<config_path>crontab/default/jobs/damConsultants_bynder_auto_sku_replace_magento/schedule/cron_expr</config_path>
-		</job> -->
+		</job>
 	</group>
 </config>
