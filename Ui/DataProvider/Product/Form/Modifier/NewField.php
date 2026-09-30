@@ -26,6 +26,10 @@ class NewField extends AbstractModifier
      * @since 101.0.0
      */
     protected $arrayManager;
+    /**
+     * @var $layoutFactory
+     */
+    protected $layoutFactory;
 
     /**
      * @param LocatorInterface $locator
@@ -91,10 +95,10 @@ class NewField extends AbstractModifier
                             'buttons' => [
                                 [
                                     'text' => __('Save'),
-                                    'class' => 'action-primary save_image', // additional class
+                                    'class' => 'action-primary save_image',
                                     'actions' => [
                                         
-                                        'closeModal', // method name
+                                        'closeModal',
                                     ],
                                 ],
                             ],
@@ -110,7 +114,7 @@ class NewField extends AbstractModifier
                                 'autoRender' => false,
                                 'componentType' => 'container',
                                 'component' => 'Magento_Ui/js/form/components/html',
-                                'dataScope' => 'data.product', // save data in the product data
+                                'dataScope' => 'data.product',
                                 'externalProvider' => 'data.product_data_source',
                                 'ns' => static::FORM_NAME,
                                 'render_url' => $this->urlBuilder->getUrl('mui/index/render'),
@@ -141,8 +145,17 @@ class NewField extends AbstractModifier
     {
         $fieldCode = 'bynder_multi_img';
         $bynder = 'bynder_isMain';
+        $cronSync = 'bynder_cron_sync';
+        $autoReplace = 'bynder_auto_replace';
+        $deletecron = 'bynder_delete_cron';
         $path = $this->arrayManager->findPath($bynder, $meta, null, 'children');
+        $pathcron = $this->arrayManager->findPath($cronSync, $meta, null, 'children');
+        $pathauto = $this->arrayManager->findPath($autoReplace, $meta, null, 'children');
+        $pathdelete = $this->arrayManager->findPath($deletecron, $meta, null, 'children');
         $meta = $this->arrayManager->set("{$path}/arguments/data/config/visible", $meta, false);
+        $meta = $this->arrayManager->set("{$pathcron}/arguments/data/config/visible", $meta, false);
+        $meta = $this->arrayManager->set("{$pathauto}/arguments/data/config/visible", $meta, false);
+        $meta = $this->arrayManager->set("{$pathdelete}/arguments/data/config/visible", $meta, false);
         $elementPath = $this->arrayManager->findPath($fieldCode, $meta, null, 'children');
         $containerPath = $this->arrayManager->findPath(static::CONTAINER_PREFIX . $fieldCode, $meta, null, 'children');
         $fieldIsDisabled = $this->locator->getProduct()->isLockedAttribute($fieldCode);
@@ -197,13 +210,11 @@ class NewField extends AbstractModifier
                             'template' => 'ui/form/components/button/container',
                             'actions' => [
                                 [
-                                    'targetName' => 'product_form.product_form.bynder_url_modal', // Element selector
+                                    'targetName' => 'product_form.product_form.bynder_url_modal',
                                     'actionName' => 'openModal',
                                 ],
                             ],
                             'additionalForGroup' => true,
-                            //'provider' => false,
-                            //'source' => 'product_details',
                             'displayArea' => 'insideGroup',
                             'sortOrder' => 20,
                             'dataScope'  => $fieldCode,
@@ -211,7 +222,6 @@ class NewField extends AbstractModifier
                     ],
                 ]
             ];
-        //}
         $meta = $this->arrayManager->merge($containerPath, $meta, $value);
 
         return $meta;
@@ -241,10 +251,10 @@ class NewField extends AbstractModifier
                             'buttons' => [
                                 [
                                     'text' => __('Save'),
-                                    'class' => 'action-primary save_doc', // additional class
+                                    'class' => 'action-primary save_doc',
                                     'actions' => [
                                         
-                                        'closeModal', // method name
+                                        'closeModal',
                                     ],
                                 ],
                             ],
@@ -260,7 +270,7 @@ class NewField extends AbstractModifier
                                 'autoRender' => false,
                                 'componentType' => 'container',
                                 'component' => 'Magento_Ui/js/form/components/html',
-                                'dataScope' => 'data.product', // save data in the product data
+                                'dataScope' => 'data.product',
                                 'externalProvider' => 'data.product_data_source',
                                 'ns' => static::FORM_NAME,
                                 'render_url' => $this->urlBuilder->getUrl('mui/index/render'),
@@ -345,13 +355,11 @@ class NewField extends AbstractModifier
                             'template' => 'ui/form/components/button/container',
                             'actions' => [
                                 [
-                                    'targetName' => 'product_form.product_form.bynder_doc_modal', // Element selector
+                                    'targetName' => 'product_form.product_form.bynder_doc_modal',
                                     'actionName' => 'openModal',
                                 ],
                             ],
                             'additionalForGroup' => true,
-                            //'provider' => false,
-                            //'source' => 'product_details',
                             'displayArea' => 'insideGroup',
                             'sortOrder' => 20,
                             'dataScope'  => $fieldCode,
@@ -359,7 +367,6 @@ class NewField extends AbstractModifier
                     ],
                 ]
             ];
-        //}
         $meta = $this->arrayManager->merge($containerPath, $meta, $value);
 
         return $meta;

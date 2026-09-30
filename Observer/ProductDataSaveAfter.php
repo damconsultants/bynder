@@ -4,18 +4,81 @@ namespace DamConsultants\Bynder\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
 use DamConsultants\Bynder\Model\ResourceModel\Collection\MetaPropertyCollectionFactory;
+use DamConsultants\Bynder\Model\ResourceModel\Collection\BynderTempDocDataCollectionFactory;
+use DamConsultants\Bynder\Model\ResourceModel\Collection\BynderTempDataCollectionFactory;
+use DamConsultants\Bynder\Model\ResourceModel\Collection\BynderMediaTableCollectionFactory;
+use DamConsultants\Bynder\Model\ResourceModel\Collection\BynderSycDataCollectionFactory;
 
 class ProductDataSaveAfter implements ObserverInterface
 {
     /**
-     * @var \Magento\Framework\App\ResourceConnection
+     * @var $cookieManager
      */
-    protected $_resource;
-
+    protected $cookieManager;
     /**
-     * @var \Magento\Catalog\Model\Product\Action
+     * @var $cookieMetadataFactory
+     */
+    protected $cookieMetadataFactory;
+    /**
+     * @var $productActionObject
      */
     protected $productActionObject;
+    /**
+     * @var $_byndersycData
+     */
+    protected $_byndersycData;
+    /**
+     * @var $datahelper
+     */
+    protected $datahelper;
+    /**
+     * @var $metaPropertyCollectionFactory
+     */
+    protected $metaPropertyCollectionFactory;
+    /**
+     * @var $bynderMediaTable
+     */
+    protected $bynderMediaTable;
+    /**
+     * @var $bynderMediaTableCollectionFactory
+     */
+    protected $bynderMediaTableCollectionFactory;
+    /**
+     * @var $bynderTempData
+     */
+    protected $bynderTempData;
+    /**
+     * @var $bynderTempDataCollectionFactory
+     */
+    protected $bynderTempDataCollectionFactory;
+    /**
+     * @var $bynderTempDocData
+     */
+    protected $bynderTempDocData;
+    /**
+     * @var $bynderTempDocDataCollectionFactory
+     */
+    protected $bynderTempDocDataCollectionFactory;
+    /**
+     * @var $_collection
+     */
+    protected $_collection;
+    /**
+     * @var $_resource
+     */
+    protected $_resource;
+    /**
+     * @var $storeManagerInterface
+     */
+    protected $storeManagerInterface;
+    /**
+     * @var $messageManager
+     */
+    protected $messageManager;
+    /**
+     * @var $resultRedirectFactory
+     */
+    protected $resultRedirectFactory;
 
     /**
      * Product save after
@@ -23,7 +86,13 @@ class ProductDataSaveAfter implements ObserverInterface
      * @param \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory
      * @param \Magento\Catalog\Model\Product\Action $productActionObject
      * @param \DamConsultants\Bynder\Model\BynderSycDataFactory $byndersycData
-     * @param \DamConsultants\Bynder\Model\ResourceModel\Collection\BynderSycDataCollectionFactory $collection
+     * @param BynderSycDataCollectionFactory $collection
+     * @param \DamConsultants\Bynder\Model\BynderMediaTableFactory $bynderMediaTable
+     * @param BynderMediaTableCollectionFactory $bynderMediaTableCollectionFactory
+     * @param DamConsultants\Bynder\Model\BynderTempDataFactory $bynderTempData
+     * @param BynderTempDataCollectionFactory $bynderTempDataCollectionFactory
+     * @param \DamConsultants\Bynder\Model\BynderTempDocDataFactory $bynderTempDocData
+     * @param BynderTempDocDataCollectionFactory $bynderTempDocDataCollectionFactory
      * @param \Magento\Framework\App\ResourceConnection $resource
      * @param \DamConsultants\Bynder\Helper\Data $DataHelper
      * @param MetaPropertyCollectionFactory $metaPropertyCollectionFactory
@@ -37,7 +106,13 @@ class ProductDataSaveAfter implements ObserverInterface
         \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory,
         \Magento\Catalog\Model\Product\Action $productActionObject,
         \DamConsultants\Bynder\Model\BynderSycDataFactory $byndersycData,
-        \DamConsultants\Bynder\Model\ResourceModel\Collection\BynderSycDataCollectionFactory $collection,
+        BynderSycDataCollectionFactory $collection,
+        \DamConsultants\Bynder\Model\BynderMediaTableFactory $bynderMediaTable,
+        BynderMediaTableCollectionFactory $bynderMediaTableCollectionFactory,
+        \DamConsultants\Bynder\Model\BynderTempDataFactory $bynderTempData,
+        BynderTempDataCollectionFactory $bynderTempDataCollectionFactory,
+        \DamConsultants\Bynder\Model\BynderTempDocDataFactory $bynderTempDocData,
+        BynderTempDocDataCollectionFactory $bynderTempDocDataCollectionFactory,
         \Magento\Framework\App\ResourceConnection $resource,
         \DamConsultants\Bynder\Helper\Data $DataHelper,
         MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
@@ -51,6 +126,12 @@ class ProductDataSaveAfter implements ObserverInterface
         $this->_byndersycData = $byndersycData;
         $this->datahelper = $DataHelper;
         $this->metaPropertyCollectionFactory = $metaPropertyCollectionFactory;
+        $this->bynderMediaTable = $bynderMediaTable;
+        $this->bynderMediaTableCollectionFactory = $bynderMediaTableCollectionFactory;
+        $this->bynderTempData = $bynderTempData;
+        $this->bynderTempDataCollectionFactory = $bynderTempDataCollectionFactory;
+        $this->bynderTempDocData = $bynderTempDocData;
+        $this->bynderTempDocDataCollectionFactory = $bynderTempDocDataCollectionFactory;
         $this->_collection = $collection;
         $this->_resource = $resource;
         $this->storeManagerInterface = $storeManagerInterface;
@@ -65,265 +146,222 @@ class ProductDataSaveAfter implements ObserverInterface
      */
     public function execute(\Magento\Framework\Event\Observer $observer)
     {
-        
         $product = $observer->getProduct();
         $productId = $observer->getProduct()->getId();
         $product_sku_key = $product->getData('sku');
         $bynder_multi_img = $product->getData('bynder_multi_img');
+        /**Doing new code and new requirements for theines */
         $bynder_document = $product->getData('bynder_document');
-        $image = $this->cookieManager->getCookie('bynder_image');
         $storeId = $this->storeManagerInterface->getStore()->getId();
-        $document = $this->cookieManager->getCookie('bynder_doc');
-        $model = $this->_byndersycData->create();
-        $collection = $this->_collection->create()->addFieldToFilter('sku', $product_sku_key);
-        $delete_collection = $this->_collection->create()->addFieldToFilter('remove_for_magento', '0');
-        $connection  = $this->_resource->getConnection();
-        $tableName = $connection->getTableName("bynder_cron_data");
-        $metaProperty_Collection = $this->metaPropertyCollectionFactory->create()->getData();
-        if (!empty($metaProperty_Collection)) {
-            $metaProperty_Collections = $this->metaPropertyCollectionFactory->create()->getData()[0]['property_id'];
+        $connection = $this->_resource->getConnection();
+        $image_coockie_id = $this->cookieManager->getCookie('image_coockie_id');
+        $doc_coockie_id = $this->cookieManager->getCookie('doc_coockie_id');
+        $all_meta_properties = $metaProperty_collection = $this->metaPropertyCollectionFactory->create()->getData();
+        $collection_data_value = [];
+        $collection_data_slug_val = [];
+        $document = "";
+        $image = "";
+        if ($image_coockie_id != 0) {
+            $bynderTempdata = $this->bynderTempDataCollectionFactory->create();
+            $bynderTempdata->addFieldToFilter('id', $image_coockie_id)->load();
+            if (isset($bynderTempdata)) {
+                foreach ($bynderTempdata as $record) {
+                    $image = $record['value'];
+                }
+            }
+        } else {
+            $image = $bynder_multi_img;
         }
-        /******************************Document Section******************************************************************************** */
-        if (isset($document)) {
-            $doc_json = json_decode($document, true);
-            $old_doc_url = [];
-            if (!empty($bynder_document)) {
-                $old_doc = json_decode($bynder_document, true);
-                
-                if (!empty($old_doc)) {
-                    foreach ($old_doc as $d_old) {
-                        $old_doc_url[] = $d_old['item_url'];
-                    }
-                    
+        $new_bynder_array = $image;
+        $old_bynder_array = $bynder_multi_img;
+        $image_details[] = [
+            "old" => $bynder_multi_img,
+            "new" => $image
+        ];
+        if ($doc_coockie_id != 0) {
+            $bynderTempdocdata = $this->bynderTempDocDataCollectionFactory->create();
+            $bynderTempdocdata->addFieldToFilter('id', $doc_coockie_id)->load();
+            if (isset($bynderTempdocdata)) {
+                foreach ($bynderTempdocdata as $recorddoc) {
+                    $document = $recorddoc['value'];
                 }
             }
-            /*********************************************When URL Already have in DataBase Then Update Data ********************************** */
-            if (!empty($collection)) {
-                $docs = [];
-                if (!empty($doc_json)) {
-                    foreach ($doc_json as $doc_s) {
-                        $docs[] = $doc_s['item_url'];
-                    }
-                }
-                $old_doc_collection = [];
-                foreach ($collection as $doc_col) {
-                    $old_doc_collection[] = $doc_col['bynder_data'];
-                    if ($doc_col['bynder_data_type'] == '2') {
-                        if (!in_array($doc_col['bynder_data'], $docs)) {
-                            $data =  ["remove_for_magento"=>"0"];
-                            $where = ['id = ?' => $doc_col['id']];
-                        } else {
-                            $data =  ["remove_for_magento"=>"1"];
-                            $where = ['id = ?' => $doc_col['id']];
-                        }
-                        $connection->update($tableName, $data, $where);
-                    }
-                }
-                /************When Delete Compactview Side then also Delete Sku Bynder Side ********************** */
-                foreach ($delete_collection as $delete) {
-                    if (!empty($metaProperty_Collections)) {
-                        if ($delete['sku'] == $product_sku_key) {
-                            $this->datahelper->getDataRemoveForMagento(
-                                $product_sku_key,
-                                $delete['media_id'],
-                                $metaProperty_Collections
-                            );
-                        }
-                    }
-                    
-                }
-                /********************************************************************************************* */
-            }
-            /******************************************Insert Data from DataBase Side****************************** */
-            if (!empty($doc_json)) {
-                foreach ($doc_json as $doc) {
-                    if (!in_array($doc['item_url'], $old_doc_url)) {
-                        $media_doc_explode = explode("/", $doc['item_url']);
-                        /*********When add Compactview side then also sku add Bynder Side ******************* */
-                        if (!empty($metaProperty_Collections)) {
-                            $this->datahelper->getAddedCompactviewSkuFromBynder(
-                                $product_sku_key,
-                                $media_doc_explode[4],
-                                $metaProperty_Collections
-                            );
-                        } else {
-                            $this->messageManager->addError(
-                                'Bynder Item Not Save First Select The Metaproperty.....'
-                            );
-                            $this->cookieManager->deleteCookie('bynder_doc');
-                            $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
-                            $publicCookieMetadata->setDurationOneYear();
-                            $publicCookieMetadata->setPath('/');
-                            $publicCookieMetadata->setHttpOnly(false);
-
-                            $this->cookieManager->setPublicCookie(
-                                'bynder_doc',
-                                null,
-                                $publicCookieMetadata
-                            );
-                            return $this->resultRedirectFactory->setPath('*/*/');
-                        }
-                        
-                        if (!in_array($doc['item_url'], $old_doc_collection)) {
-                            $data_doc_value = [
-                                'sku' => $product_sku_key,
-                                'bynder_data' => $doc['item_url'],
-                                'bynder_data_type' => '2',
-                                'media_id' => $media_doc_explode[4],
-                                'remove_for_magento' => '1',
-                                'added_on_cron_compactview' => '2',
-                                'added_date' => time()
-                            ];
-                            $model->setData($data_doc_value);
-                            $model->save();
-                        }
-                    }
-                    
-                }
-            }
-            $this->productActionObject->updateAttributes([$productId], ['bynder_document' => $document], 0);
-            $this->cookieManager->deleteCookie('bynder_doc');
-            $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
-            $publicCookieMetadata->setDurationOneYear();
-            $publicCookieMetadata->setPath('/');
-            $publicCookieMetadata->setHttpOnly(false);
-
-            $this->cookieManager->setPublicCookie(
-                'bynder_doc',
-                null,
-                $publicCookieMetadata
-            );
+        } else {
+            $document = $bynder_document;
         }
-        /******************************************************************************************************************** */
-        /***************************Video and Image Section ***************************************************************** */
-        $video = "";
-        $flag = 0;
-        if (isset($image)) {
-            $image_json = json_decode($image, true);
-            $old_url = [];
-            if (!empty($bynder_multi_img)) {
-                $old_img = json_decode($bynder_multi_img, true);
-                
-                if (!empty($old_img)) {
-                    foreach ($old_img as $old) {
-                        $old_url[] = $old['item_url'];
-                    }
-                    
-                }
+        if (count($metaProperty_collection) >= 1) {
+            foreach ($metaProperty_collection as $key => $collection_value) {
+                $collection_data_value[] = [
+                    'id' => $collection_value['id'],
+                    'property_name' => $collection_value['property_name'],
+                    'property_id' => $collection_value['property_id'],
+                    'magento_attribute' => $collection_value['magento_attribute'],
+                    'attribute_id' => $collection_value['attribute_id'],
+                    'bynder_property_slug' => $collection_value['bynder_property_slug'],
+                    'system_slug' => $collection_value['system_slug'],
+                    'system_name' => $collection_value['system_name']
+                ];
+                $collection_data_slug_val[$collection_value['system_slug']] = [
+                    'bynder_property_slug' => $collection_value['bynder_property_slug'],
+                    'property_id' => $collection_value['property_id']
+                ];
             }
-            /*********************************************When URL Already have in DataBase Then Update Data ********************************** */
-            if (!empty($collection)) {
-                $imgse = [];
-                if (!empty($image_json)) {
-                    foreach ($image_json as $imgs) {
-                        $imgse[] = $imgs['item_url'];
-                    }
-                }
-                $old_collection = [];
-                $sku = [];
-                foreach ($collection as $col) {
-                    $old_collection[] = $col['bynder_data'];
-                    $sku[] = $col['sku'];
-                    if ($col['bynder_data_type'] != '2') {
-                        if (!in_array($col['bynder_data'], $imgse)) {
-                            $data =  ["remove_for_magento"=>"0"];
-                            $where = ['id = ?' => $col['id']];
-                        } else {
-                            $data =  ["remove_for_magento"=>"1"];
-                            $where = ['id = ?' => $col['id']];
-                        }
-                        $connection->update($tableName, $data, $where);
-                    }
-                }
-                /************When Delete Compactview Side then also Delete Sku Bynder Side ********************** */
-                foreach ($delete_collection as $delete) {
-                    if (!empty($metaProperty_Collections)) {
-                        if ($delete['sku'] == $product_sku_key) {
-                            $this->datahelper->getDataRemoveForMagento(
-                                $product_sku_key,
-                                $delete['media_id'],
-                                $metaProperty_Collections
-                            );
-                        }
-                    }
-                }
-                /********************************************************************************************* */
+        }
+        if (isset($collection_data_slug_val["sku"]["property_id"])) {
+            $metaProperty_Collections = $collection_data_slug_val["sku"]["property_id"];
+            /******************************Document Section******************************************************************************** */
+            if (isset($document)) {
+                $this->productActionObject->updateAttributes([$productId], ['bynder_document' => $document], $storeId);
+                $this->bynderTempDocData->create()->load($doc_coockie_id)->delete();
+                $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
+                $publicCookieMetadata->setDurationOneYear();
+                $publicCookieMetadata->setPath('/');
+                $publicCookieMetadata->setHttpOnly(false);
+
+                $this->cookieManager->setPublicCookie(
+                    'doc_coockie_id',
+                    0,
+                    $publicCookieMetadata
+                );
+            } else {
+                $this->productActionObject->updateAttributes([$productId], ['bynder_document' => ""], $storeId);
+                $this->bynderTempDocData->create()->load($doc_coockie_id)->delete();
+                $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
+                $publicCookieMetadata->setDurationOneYear();
+                $publicCookieMetadata->setPath('/');
+                $publicCookieMetadata->setHttpOnly(false);
+
+                $this->cookieManager->setPublicCookie(
+                    'doc_coockie_id',
+                    0,
+                    $publicCookieMetadata
+                );
             }
-             
+            /***************************Video and Image Section ***************************************************************** */
+            $video = "";
+            $flag = 0;
             $type = [];
-            /******************************************Insert Data from DataBase Side****************************** */
-            if (!empty($image_json)) {
-                foreach ($image_json as $img) {
-                    if (!in_array($img['item_url'], $old_url)) {
-                        $media_image_explode = explode("/", $img['item_url']);
-                        /*********When add Compactview side then also sku add Bynder Side ******************* */
-                        if (!empty($metaProperty_Collections)) {
-                            $this->datahelper->getAddedCompactviewSkuFromBynder(
-                                $product_sku_key,
-                                $media_image_explode[5],
-                                $metaProperty_Collections
-                            );
-                        } else {
-                            $this->messageManager->addError(
-                                'Bynder Item Not Save First Select The Metaproperty.....'
-                            );
-                            $this->cookieManager->deleteCookie('bynder_image');
-                            $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
-                            $publicCookieMetadata->setDurationOneYear();
-                            $publicCookieMetadata->setPath('/');
-                            $publicCookieMetadata->setHttpOnly(false);
-
-                            $this->cookieManager->setPublicCookie(
-                                'bynder_image',
-                                null,
-                                $publicCookieMetadata
-                            );
-                            return $this->resultRedirectFactory->setPath('*/*/');
-                        }
-                        if (!in_array($img['item_url'], $old_collection)) {
-                            $data_image_data = [
-                                'sku' => $product_sku_key,
-                                'bynder_data' =>$img['item_url'],
-                                'bynder_data_type' => ($img['item_type'] == "IMAGE") ? '1' : '3',
-                                'media_id' => $media_image_explode[5],
-                                'remove_for_magento' => '1',
-                                'added_on_cron_compactview' => '2',
-                                'added_date' => time()
-                            ];
-                            $model->setData($data_image_data);
-                            $model->save();
-                        }
-                        
+            $m_id = [];
+            try {
+                if (!empty($image)) {
+                    $img_array = json_decode($image, true);
+                    foreach ($img_array as $img) {
+                        $type[] = $img['item_type'];
+                        $m_id[] = $img['bynder_md_id'];
+                        $this->getDeleteMedaiDataTable($product_sku_key, $img['bynder_md_id']);
                     }
-                    $type[] = $img['item_type'];
+                    $this->getInsertMedaiDataTable($product_sku_key, $m_id);
+                    /*  IMAGE & VIDEO == 1
+                    IMAGE == 2
+                    VIDEO == 3 */
+                    if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
+                        $flag = 1;
+                    } elseif (in_array("IMAGE", $type)) {
+                        $flag = 2;
+                    } elseif (in_array("VIDEO", $type)) {
+                        $flag = 3;
+                    }
+                    $this->productActionObject->updateAttributes([$productId], ['bynder_isMain' => $flag], $storeId);
+                    $this->productActionObject->updateAttributes(
+                        [$productId],
+                        ['bynder_multi_img' => $image],
+                        $storeId
+                    );
+                    $this->bynderTempData->create()->load($image_coockie_id)->delete();
+                    $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
+                    $publicCookieMetadata->setDurationOneYear();
+                    $publicCookieMetadata->setPath('/');
+                    $publicCookieMetadata->setHttpOnly(false);
+                    $this->cookieManager->setPublicCookie(
+                        'image_coockie_id',
+                        0,
+                        $publicCookieMetadata
+                    );
+                } else {
+                    $this->getDeleteMedaiDataTable($product_sku_key, $m_id);
+                    $this->productActionObject->updateAttributes([$productId], ['bynder_isMain' => ""], $storeId);
+                    $this->productActionObject->updateAttributes(
+                        [$productId],
+                        ['bynder_multi_img' => $image],
+                        $storeId
+                    );
+                    $this->productActionObject->updateAttributes([$productId], ['bynder_cron_sync' => ""], $storeId);
+                    $this->productActionObject->updateAttributes([$productId], ['bynder_auto_replace' => ""], $storeId);
+                    $this->bynderTempData->create()->load($image_coockie_id)->delete();
+                    $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
+                    $publicCookieMetadata->setDurationOneYear();
+                    $publicCookieMetadata->setPath('/');
+                    $publicCookieMetadata->setHttpOnly(false);
+                    $this->cookieManager->setPublicCookie(
+                        'image_coockie_id',
+                        0,
+                        $publicCookieMetadata
+                    );
                 }
-                /*  IMAGE & VIDEO == 1
-                IMAGE == 2
-                VIDEO == 3 */
-                if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
-                    $flag = 1;
-                } elseif (in_array("IMAGE", $type)) {
-                    $flag = 2;
-                } elseif (in_array("VIDEO", $type)) {
-                    $flag = 3;
-                }
+            } catch (\Exception $e) {
+                $this->productActionObject->updateAttributes(
+                    [$productId],
+                    ['bynder_multi_img' => $bynder_multi_img],
+                    $storeId
+                );
+                $this->bynderTempData->create()->load($image_coockie_id)->delete();
+                $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
+                $publicCookieMetadata->setDurationOneYear();
+                $publicCookieMetadata->setPath('/');
+                $publicCookieMetadata->setHttpOnly(false);
+                $this->cookieManager->setPublicCookie(
+                    'image_coockie_id',
+                    0,
+                    $publicCookieMetadata
+                );
             }
-            $this->productActionObject->updateAttributes([$productId], ['bynder_isMain' => $flag], $storeId);
-            $this->productActionObject->updateAttributes([$productId], ['bynder_multi_img' => $image], $storeId);
-            if ($product->getBynderVideos()) {
-                $this->productActionObject->updateAttributes([$productId], ['bynder_videos' => $video], $storeId);
+        }
+    }
+    /**
+     * Is Json
+     *
+     * @param string $sku
+     * @param array $m_id
+     * @return $this
+     */
+    public function getInsertMedaiDataTable($sku, $m_id)
+    {
+        $model = $this->bynderMediaTable->create();
+        $modelcollection = $this->bynderMediaTableCollectionFactory->create();
+        $modelcollection->addFieldToFilter('sku', ['eq' => [$sku]])->load();
+        $table_m_id = [];
+        if (!empty($modelcollection)) {
+            foreach ($modelcollection as $mdata) {
+                $table_m_id[] = $mdata['media_id'];
             }
-            $this->cookieManager->deleteCookie('bynder_image');
-            $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
-            $publicCookieMetadata->setDurationOneYear();
-            $publicCookieMetadata->setPath('/');
-            $publicCookieMetadata->setHttpOnly(false);
+        }
+        $media_diff = array_diff($m_id, $table_m_id);
+        foreach ($media_diff as $new_data) {
+            $data_image_data = [
+                'sku' => $sku,
+                'media_id' => trim($new_data),
+                'status' => "1",
+            ];
+            $model->setData($data_image_data);
+            $model->save();
+        }
+    }
+    /**
+     * Is Json
+     *
+     * @param string $sku
+     * @param array $media_id
+     * @return $this
+     */
+    public function getDeleteMedaiDataTable($sku, $media_id)
+    {
+        $model = $this->bynderMediaTableCollectionFactory->create();
+        $model->addFieldToFilter('sku', ['eq' => [$sku]])->load();
+        foreach ($model as $mdata) {
+            if ($mdata['media_id'] != $media_id) {
+                $this->bynderMediaTable->create()->load($mdata['id'])->delete();
 
-            $this->cookieManager->setPublicCookie(
-                'bynder_image',
-                null,
-                $publicCookieMetadata
-            );
+            }
         }
     }
 }

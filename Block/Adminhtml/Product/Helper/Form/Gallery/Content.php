@@ -4,27 +4,12 @@
  * See COPYING.txt for license details.
  */
 
-/**
- * Catalog product form gallery content
- *
- * @author      Magento Core Team <core@magentocommerce.com>
- *
- * @method \Magento\Framework\Data\Form\Element\AbstractElement getElement()
- */
 namespace DamConsultants\Bynder\Block\Adminhtml\Product\Helper\Form\Gallery;
 
-use Magento\Framework\App\ObjectManager;
-use Magento\Backend\Block\Media\Uploader;
-use Magento\Framework\View\Element\AbstractBlock;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\Exception\FileSystemException;
 use Magento\Backend\Block\DataProviders\ImageUploadConfig as ImageUploadConfigDataProvider;
 use Magento\MediaStorage\Helper\File\Storage\Database;
 use DamConsultants\Bynder\Helper\Data;
 
-/**
- * Block for gallery content.
- */
 class Content extends \Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Gallery\Content
 {
     /**
@@ -33,81 +18,76 @@ class Content extends \Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Galle
     protected $_template = 'Magento_Catalog::catalog/product/helper/gallery.phtml';
 
     /**
-     * @var \Magento\Catalog\Model\Product\Media\Config
+     * @var \Magento\Framework\App\RequestInterface
      */
-    protected $_mediaConfig;
+    protected $request;
 
     /**
-     * @var \Magento\Framework\Json\EncoderInterface
+     * @var Data
      */
-    protected $_jsonEncoder;
+    protected $b_datahelper;
 
     /**
-     * @var \Magento\Catalog\Helper\Image
-     */
-    private $imageHelper;
-
-    /**
-     * @var ImageUploadConfigDataProvider
-     */
-    private $imageUploadConfigDataProvider;
-
-    /**
-     * @var Database
-     */
-    private $fileStorageDatabase;
-
-    /**
-     * Catalog product form gallery content
+     * Constructor
      *
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\Json\EncoderInterface $jsonEncoder
      * @param \Magento\Catalog\Model\Product\Media\Config $mediaConfig
-     * @param ImageUploadConfigDataProvider $imageUploadConfigDataProvider
      * @param Data $bynderData
      * @param \Magento\Framework\App\RequestInterface $httpRequest
-     * @param Database $fileStorageDatabase
+     * @param ImageUploadConfigDataProvider|null $imageUploadConfigDataProvider
+     * @param Database|null $fileStorageDatabase
      * @param array $data
      */
-
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Json\EncoderInterface $jsonEncoder,
         \Magento\Catalog\Model\Product\Media\Config $mediaConfig,
-        ImageUploadConfigDataProvider $imageUploadConfigDataProvider = null,
         Data $bynderData,
         \Magento\Framework\App\RequestInterface $httpRequest,
-        Database $fileStorageDatabase = null,
+        ?ImageUploadConfigDataProvider $imageUploadConfigDataProvider = null,
+        ?Database $fileStorageDatabase = null,
         array $data = []
     ) {
-        parent::__construct($context, $jsonEncoder, $mediaConfig, $data);
-        $this-> request = $httpRequest;
+        parent::__construct(
+            $context,
+            $jsonEncoder,
+            $mediaConfig,
+            $data,
+            $imageUploadConfigDataProvider,
+            $fileStorageDatabase
+        );
+
+        $this->request = $httpRequest;
         $this->b_datahelper = $bynderData;
     }
+
     /**
-     * Check Bynder.
+     * Check Bynder
      *
      * @return array
      */
     public function getcheckbynder()
     {
-        $check_bynder = $this->b_datahelper->getCheckBynder();
-        $array = json_decode($check_bynder, true);
-        return $array;
+        $checkBynder = $this->b_datahelper->getCheckBynder();
+
+        return json_decode($checkBynder, true);
     }
+
     /**
-     * Get HttpData.
+     * Get HTTP host
      *
-     * @return $this
+     * @return string|null
      */
     public function getHttpData()
     {
         return $this->request->getServer('HTTP_HOST');
     }
+
     /**
-     * EntityId.
+     * Get entity ID
      *
-     * @return $this
+     * @return mixed
      */
     public function getEntityId()
     {

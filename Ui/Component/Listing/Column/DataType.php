@@ -1,12 +1,12 @@
 <?php
 /**
- * Bynder
+ * bynder
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the ecomteck.com license that is
  * available through the world-wide-web at this URL:
- * https://Bynder.com/
+ * https://bynder .com/
  *
  * DISCLAIMER
  *
@@ -65,8 +65,10 @@ class DataType extends \Magento\Ui\Component\Listing\Columns\Column
                         $type ='Image';
                     } elseif ($item['bynder_data_type'] == 2) {
                         $type = 'Document';
-                    } else {
+                    } elseif ($item['bynder_data_type'] == 3) {
                         $type = 'Video';
+                    } else {
+                        $type ="";
                     }
                     $item['bynder_data_type'] = $type;
                 }

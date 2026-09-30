@@ -18,6 +18,14 @@ use Magento\Framework\App\Action\Action;
 class Index extends Action
 {
     /**
+     * @var $b_datahelper
+     */
+    protected $b_datahelper;
+    /**
+     * @var $redirecturi
+     */
+    protected $redirecturi;
+    /**
      * Index.
      * @param \Magento\Backend\App\Action\Context $context
      * @param \DamConsultants\Bynder\Helper\Data $bynderData
@@ -42,8 +50,8 @@ class Index extends Action
             "html" => "",
             "data" => "",
             "message" => "something went wrong. please re-login & try again",
-            "_POST" => $this->getRequest()->getPost(),//$_POST,
-            "_GET" => $this->getRequest()->getParams(),//$_GET,
+            "_POST" => $this->getRequest()->getPost(),
+            "_GET" => $this->getRequest()->getParams(),
             "getcwd" => getcwd()
         ];
 

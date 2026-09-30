@@ -56,7 +56,7 @@ class AddBynderAttribute implements DataPatchInterface
             'input' => 'textarea',
             'class' => '',
             'source' => '',
-            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_STORE,
+            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
             'visible' => true,
             'required' => false,
             'user_defined' => false,
@@ -69,7 +69,6 @@ class AddBynderAttribute implements DataPatchInterface
             'unique' => false,
             'apply_to' => ''
         ]);
-
         $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_document');
         $eavSetup->addAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_document', [
             'group' => 'Product Details',
@@ -81,7 +80,7 @@ class AddBynderAttribute implements DataPatchInterface
             'input' => 'textarea',
             'class' => '',
             'source' => '',
-            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_STORE,
+            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
             'visible' => true,
             'required' => false,
             'user_defined' => false,
@@ -102,33 +101,6 @@ class AddBynderAttribute implements DataPatchInterface
             'backend' => '',
             'frontend' => '',
             'label' => 'Use Bynder Image as well as Local Folder Image',
-            'input' => 'boolean',
-            'class' => '',
-            'source' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class,
-            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
-            'visible' => true,
-            'required' => false,
-            'user_defined' => false,
-            'user_defined' => true,
-            'default' => '',
-            'searchable' => false,
-            'filterable' => false,
-            'comparable' => false,
-            'visible_on_front' => false,
-            'used_in_product_listing' => true,
-            'unique' => false,
-            'apply_to' => ''
-            /* 'attribute_set_id' => '4' */
-        ]);
-
-        $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_image_import');
-        $eavSetup->addAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_image_import', [
-            'group' => 'Product Details',
-            'type' => 'int',
-            'sort_order' => 240,
-            'backend' => '',
-            'frontend' => '',
-            'label' => 'Import Bynder Image into the local Folder',
             'input' => 'boolean',
             'class' => '',
             'source' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::class,
@@ -175,6 +147,100 @@ class AddBynderAttribute implements DataPatchInterface
             /* 'attribute_set_id' => '4' */
         ]);
 
+        $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_isMain');
+        $eavSetup->addAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_isMain', [
+            'group' => 'Product Details',
+            'type' => 'text',
+            'backend' => '',
+            'frontend' => '',
+            'sort_order' => 270,
+            'label' => 'Only Bynder isMain',
+            'input' => 'text',
+            'class' => '',
+            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
+            'visible' => true,
+            'required' => false,
+            'user_defined' => false,
+            'default' => '',
+            'searchable' => false,
+            'filterable' => false,
+            'comparable' => false,
+            'unique' => false,
+            'visible_on_front' => false,
+            'used_in_product_listing' => true,
+            'apply_to' => ''
+        ]);
+
+        $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_cron_sync');
+        $eavSetup->addAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_cron_sync', [
+            'group' => 'Product Details',
+            'type' => 'text',
+            'backend' => '',
+            'frontend' => '',
+            'sort_order' => 290,
+            'label' => 'Bynder Cron',
+            'input' => 'text',
+            'class' => '',
+            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
+            'visible' => true,
+            'required' => false,
+            'user_defined' => false,
+            'default' => '',
+            'searchable' => false,
+            'filterable' => false,
+            'comparable' => false,
+            'unique' => false,
+            'visible_on_front' => false,
+            'used_in_product_listing' => true,
+            'apply_to' => ''
+        ]);
+
+        $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_auto_replace');
+        $eavSetup->addAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_auto_replace', [
+            'group' => 'Product Details',
+            'type' => 'text',
+            'backend' => '',
+            'frontend' => '',
+            'sort_order' => 300,
+            'label' => 'Bynder Auto Replace',
+            'input' => 'text',
+            'class' => '',
+            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
+            'visible' => true,
+            'required' => false,
+            'user_defined' => false,
+            'default' => '',
+            'searchable' => false,
+            'filterable' => false,
+            'comparable' => false,
+            'unique' => false,
+            'visible_on_front' => false,
+            'used_in_product_listing' => true,
+            'apply_to' => ''
+        ]);
+        $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_delete_cron');
+        $eavSetup->addAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_delete_cron', [
+            'group' => 'Product Details',
+            'type' => 'text',
+            'backend' => '',
+            'frontend' => '',
+            'sort_order' => 300,
+            'label' => 'Bynder Delete Cron',
+            'input' => 'text',
+            'class' => '',
+            'global' => \Magento\Catalog\Model\ResourceModel\Eav\Attribute::SCOPE_GLOBAL,
+            'visible' => true,
+            'required' => false,
+            'user_defined' => false,
+            'default' => '',
+            'searchable' => false,
+            'filterable' => false,
+            'comparable' => false,
+            'unique' => false,
+            'visible_on_front' => false,
+            'used_in_product_listing' => true,
+            'apply_to' => ''
+        ]);
         $this->moduleDataSetup->getConnection()->endSetup();
     }
 
@@ -193,12 +259,4 @@ class AddBynderAttribute implements DataPatchInterface
     {
         return [];
     }
-
-    /**
-     * @inheritdoc
-     */
-   /* public static function getVersion()
-    {
-        return '2.0.1';
-    }*/
 }

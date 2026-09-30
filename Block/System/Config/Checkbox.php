@@ -37,7 +37,8 @@ class Checkbox extends Field
     {
         $values = [];
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $valuess = $objectManager->create(\DamConsultants\Bynder\Model\Config\Source\Checkbox::class)->toOptionArray();
+        $val = $objectManager->create(\DamConsultants\Bynder\Model\Config\Source\Checkbox::class);
+        $valuess = $val->toOptionArray();
         foreach ($valuess as $value) {
             $values[$value['value']] = $value['label'];
         }

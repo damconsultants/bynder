@@ -33,11 +33,11 @@ class Remove implements ArrayInterface
         return [
             [
                 'value' => 0,
-                'label' => __('Remove for Magento'),
+                'label' => __('No data'),
             ],
             [
                 'value' => 1,
-                'label' => __('Not Remove for Magento'),
+                'label' => __('Import into magento'),
             ],
             [
                 'value' => 2,

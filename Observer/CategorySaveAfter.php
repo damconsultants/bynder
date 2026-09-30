@@ -10,11 +10,7 @@ class Categorysaveafter implements ObserverInterface
     /**
      * @var $helper
      */
-    protected $helper;
-    /**
-     * @var $cmsHelper
-     */
-    protected $cmsHelper;
+    protected $_datahelper;
 
     /**
      * Categorysaveafter

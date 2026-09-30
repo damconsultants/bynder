@@ -38,8 +38,8 @@ class CronConfig extends \Magento\Framework\App\Config\Value
         \Magento\Framework\App\Config\ScopeConfigInterface $config,
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
         \Magento\Framework\App\Config\ValueFactory $configValueFactory,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        ?\Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        ?\Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         $runModelPath = '',
         array $data = []
     ) {
@@ -57,25 +57,25 @@ class CronConfig extends \Magento\Framework\App\Config\Value
     {
         $time = $this->getData('groups/configurable_cron/fields/time/value');
         $frequency = $this->getData('groups/configurable_cron/fields/frequency/value');
-        $custom_time = $this->getConfigValue();
+        $custom_time = $this->getData('groups/configurable_cron/fields/your_min_featch/value');
         $every_min =  \DamConsultants\Bynder\Model\Config\Source\Frequency::EVERY_TEN_TIME;
         if ($frequency == $every_min) {
             $cronExprArray = [
-                '*/'.$custom_time, //Minute
-                '*', //Hour
-                '*', //Day of the Month
-                '*', //Month of the Year
-                '*', //Day of the Week
+                '*/'.$custom_time, /*Minute*/
+                '*', /*Hour*/
+                '*', /*Day of the Month*/
+                '*', /*Month of the Year*/
+                '*', /*Day of the Week*/
             ];
         } else {
             $cronExprArray = [
-                (int)$time[1], //Minute
-                (int)$time[0], //Hour
+                (int)$time[1], /*Minute*/
+                (int)$time[0], /*Hour*/
                 $frequency == \DamConsultants\Bynder\Model\Config\Source\Frequency::CRON_MONTHLY ?
-                '1' : '*', //Day of the Month
-                '*', //Month of the Year
+                '1' : '*', /*Day of the Month*/
+                '*', /*Month of the Year*/
                 $frequency == \DamConsultants\Bynder\Model\Config\Source\Frequency::CRON_WEEKLY ?
-                '1' : '*', //Day of the Week
+                '1' : '*', /*Day of the Week*/
             ];
         }
         $cronExprString = join(' ', $cronExprArray);

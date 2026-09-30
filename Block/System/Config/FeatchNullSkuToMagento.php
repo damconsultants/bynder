@@ -15,6 +15,18 @@ class FeatchNullSkuToMagento extends Field
      * @var string
      */
     protected $_template = 'DamConsultants_Bynder::system/config/comment.phtml';
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $_storeManager;
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $HelperBackend;
 
     /**
      * Button

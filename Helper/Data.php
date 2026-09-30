@@ -11,43 +11,69 @@ class Data extends AbstractHelper
      * @var $storeScope
      */
     protected $storeScope;
-
     /**
      * @var $productrepository
      */
     protected $productrepository;
-
     /**
      * @var \Magento\Framework\Filesystem
      */
     protected $filesystem;
-
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     protected $_scopeConfig;
-
+    /**
+     * @var $_curl
+     */
+    protected $_curl;
     /**
      * @var $by_redirecturl
      */
     public $by_redirecturl;
-
     /**
      * @var $bynderDomain
      */
     public $bynderDomain = "";
-
+    /**
+     * @var $cookieMetadataFactory
+     */
+    protected $cookieMetadataFactory;
+    /**
+     * @var $cookieManager
+     */
+    protected $cookieManager;
+    /**
+     * @var $_storeManager
+     */
+    protected $_storeManager;
+    /**
+     * @var $_bulk
+     */
+    protected $_bulk;
+    /**
+     * @var \Magento\Framework\Registry
+     * @deprecated Registry is deprecated in Magento; use product repository instead
+     * @see \Magento\Catalog\Api\ProductRepositoryInterface
+     */
+    protected $_registry;
     /**
      * @var $permanent_token
      */
     public $permanent_token = "";
-    
+
     public const BYNDER_DOMAIN = 'bynderconfig/bynder_credential/bynderdomain';
     public const PERMANENT_TOKEN = 'bynderconfig/bynder_credential/permanent_token';
     public const LICENCE_TOKEN = 'bynderconfig/bynder_credential/licenses_key';
     public const RADIO_BUTTON = 'byndeimageconfig/bynder_image/selectimage';
+    public const FETCH_CRON = 'cronimageconfig/configurable_cron/fetch_enable';
+    public const AUTO_CRON = 'cronimageconfig/auto_add_bynder/auto_enable';
+    public const DELETE_CRON = 'cronimageconfig/delete_cron_bynder/delete_enable';
+    public const FETCH_PRODUCT_SKU_LIMIT = 'cronimageconfig/configurable_cron/fetch_product_sku_limt';
+    public const AUTO_PRODUCT_SKU_LIMIT = 'cronimageconfig/auto_add_bynder/auto_product_sku_limt';
     public const PRODUCT_SKU_LIMIT = 'cronimageconfig/set_limit_product_sku/product_sku_limt';
-    public const API_CALLED = 'https://trello.thedamconsultants.com/';
+    public const API_CALLED = 'https://developer.thedamconsultants.com/';
+    public const IFRAME_URL = 'https://trello.thedamconsultants.com/registration';
 
     /**
      * Data Helper
@@ -59,6 +85,8 @@ class Data extends AbstractHelper
      * @param \Magento\Framework\HTTP\Client\Curl $curl
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\ConfigurableProduct\Block\Adminhtml\Product\Steps\Bulk $bulk
      */
     public function __construct(
         \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory,
@@ -68,7 +96,9 @@ class Data extends AbstractHelper
         \Magento\Framework\Filesystem $filesystem,
         \Magento\Framework\HTTP\Client\Curl $curl,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Store\Model\StoreManagerInterface $storeManager
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Framework\Registry $registry,
+        \Magento\ConfigurableProduct\Block\Adminhtml\Product\Steps\Bulk $bulk
     ) {
         $this->cookieMetadataFactory = $cookieMetadataFactory;
         $this->cookieManager = $cookieManager;
@@ -77,7 +107,28 @@ class Data extends AbstractHelper
         $this->_scopeConfig = $context->getScopeConfig();
         $this->_storeManager = $storeManager;
         $this->_curl = $curl;
+        $this->_bulk = $bulk;
+        $this->_registry = $registry;
         parent::__construct($context);
+    }
+    /**
+     * Get Bulk Image Roll
+     *
+     * @return $this
+     */
+    public function getBulkImageRoll()
+    {
+        return $this->_bulk->getMediaAttributes();
+    }
+    /**
+     * Get Image Roll
+     *
+     * @return $this
+     * @param string $currentProduct
+     */
+    public function getProduct($currentProduct)
+    {
+        return $this->_registry->registry($currentProduct);
     }
     /**
      * Get Product Id
@@ -87,8 +138,10 @@ class Data extends AbstractHelper
      */
     public function getProductById($productId)
     {
+
         return $this->productrepository->getById($productId);
     }
+    
     /**
      * Get Store Config
      *
@@ -119,6 +172,16 @@ class Data extends AbstractHelper
         return (string) $this->getStoreConfig(self::PERMANENT_TOKEN);
     }
     /**
+     * Get Permanent Token
+     *
+     * @param string $path
+     * @return $this
+     */
+    public function getDeleteCron($path)
+    {
+        return (string) $this->getStoreConfig($path);
+    }
+    /**
      * Get Licence Token
      *
      * @return $this
@@ -134,16 +197,34 @@ class Data extends AbstractHelper
      */
     public function byndeimageconfig()
     {
-        return (string) $this->getStoreConfig(self::RADIO_BUTTON);
+        return (bool) $this->getStoreConfig(self::RADIO_BUTTON);
     }
     /**
      * Get Product Sku Limit Config
      *
      * @return $this
      */
-    public function getProductSkuLimitConfig()
+    /*public function getProductSkuLimitConfig()
     {
         return (string) $this->getStoreConfig(self::PRODUCT_SKU_LIMIT);
+    }*/
+    /**
+     * Get Product Sku Limit Config
+     *
+     * @return $this
+     */
+    public function getAutoProductSkuLimitConfig()
+    {
+        return (string) $this->getStoreConfig(self::AUTO_PRODUCT_SKU_LIMIT);
+    }
+    /**
+     * Get Product Sku Limit Config
+     *
+     * @return $this
+     */
+    public function getFetchProductSkuLimitConfig()
+    {
+        return (string) $this->getStoreConfig(self::FETCH_PRODUCT_SKU_LIMIT);
     }
     /**
      * Get Bynder Dom
@@ -152,7 +233,43 @@ class Data extends AbstractHelper
      */
     public function getBynderDom()
     {
-        return (string) $this->getConfig(self::BYNDER_DOMAIN);
+        return (string) $this->getStoreConfig(self::BYNDER_DOMAIN);
+    }
+    /**
+     * Get Iframe Url
+     *
+     * @return $this
+     */
+    public function getIframeUrl()
+    {
+        return self::IFRAME_URL;
+    }
+    /**
+     * Get Fetch cron enable
+     *
+     * @return $this
+     */
+    public function getFetchCronEnable()
+    {
+        return $this->getStoreConfig(self::FETCH_CRON);
+    }
+    /**
+     * Get Auto cron enable
+     *
+     * @return $this
+     */
+    public function getAutoCronEnable()
+    {
+        return $this->getStoreConfig(self::AUTO_CRON);
+    }
+    /**
+     * Get Auto cron enable
+     *
+     * @return $this
+     */
+    public function getDeleteCronEnable()
+    {
+        return $this->getStoreConfig(self::DELETE_CRON);
     }
     /**
      * Get Permanen Token
@@ -161,7 +278,7 @@ class Data extends AbstractHelper
      */
     public function getPermanenToken()
     {
-        return (string) $this->getConfig(self::PERMANENT_TOKEN);
+        return (string) $this->getStoreConfig(self::PERMANENT_TOKEN);
     }
     /**
      * Get Load Credential
@@ -170,7 +287,7 @@ class Data extends AbstractHelper
      */
     public function getLoadCredential()
     {
-        
+
         $this->bynderDomain = $this->getBynderDom();
         $this->permanent_token = $this->getPermanenToken();
         $this->by_redirecturl = $this->getRedirecturl();
@@ -189,6 +306,7 @@ class Data extends AbstractHelper
     {
         return (string) $this->getbaseurl() . "bynder/redirecturl";
     }
+
     /**
      * Get baseurl
      *
@@ -223,7 +341,7 @@ class Data extends AbstractHelper
         $jsonData = '{}';
         $fields = json_encode($fields);
 
-        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'check-bynder-license');
+        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'check-license');
         $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
         $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
         $this->_curl->setOption(CURLOPT_ENCODING, '');
@@ -231,11 +349,11 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
-        $this->_curl->post(self::API_CALLED . 'check-bynder-license', $jsonData);
-        //read response
+
+        $this->_curl->post(self::API_CALLED . 'check-license', $jsonData);
+
         $response = $this->_curl->getBody();
         return $response;
     }
@@ -255,7 +373,8 @@ class Data extends AbstractHelper
             'databaseId' => $bynder_auth['og_media_ids'],
             'daatasetType' => $bynder_auth['dataset_types'],
             'base_url' => $this->_storeManager->getStore()->getBaseUrl(),
-            'licence_token' => $this->getLicenceToken()
+            'licence_token' => $this->getLicenceToken(),
+            'bynder_metaproperty_collection' => $bynder_auth['collection_data_value']
         ];
         $jsonData = '{}';
         $fields = json_encode($fields);
@@ -268,12 +387,13 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'magento-derivatives', $jsonData);
-        //read response
+
         $response = $this->_curl->getBody();
+        
         return $response;
     }
     /**
@@ -297,11 +417,11 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'get-license-key', $jsonData);
-        //read response
+
         $response = $this->_curl->getBody();
         return $response;
     }
@@ -334,11 +454,11 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'change-metadata-magento', $jsonData);
-        //read response
+
         $response = $this->_curl->getBody();
         return $response;
     }
@@ -371,11 +491,11 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'change-metadata-magento-doc', $jsonData);
-        //read response
+
         $response = $this->_curl->getBody();
         return $response;
     }
@@ -408,11 +528,11 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'change-metadata-magento-video', $jsonData);
-        //read response
+
         $response = $this->_curl->getBody();
         return $response;
     }
@@ -445,11 +565,11 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'change-metadata-magento-cms-page', $jsonData);
-        //read response
+
         $response = $this->_curl->getBody();
         return $response;
     }
@@ -468,7 +588,6 @@ class Data extends AbstractHelper
         ];
         $jsonData = '{}';
         $fields = json_encode($fields);
-
         $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'get-bynder-meta-properites');
         $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
         $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
@@ -477,12 +596,13 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'get-bynder-meta-properites', $jsonData);
-        //read response
+
         $response = $this->_curl->getBody();
+        
         return $response;
     }
     /**
@@ -491,8 +611,9 @@ class Data extends AbstractHelper
      * @return $this
      * @param string $sku_id
      * @param string $property_id
+     * @param string $collection_data_value
      */
-    public function getImageSyncWithProperties($sku_id, $property_id)
+    public function getImageSyncWithProperties($sku_id, $property_id, $collection_data_value)
     {
         $fields = [
             'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
@@ -500,11 +621,13 @@ class Data extends AbstractHelper
             'permanent_token' => $this->getPermanenToken(),
             'licence_token' => $this->getLicenceToken(),
             'sku_id' => $sku_id,
-            'property_id' => $property_id
+            'property_id' => $property_id,
+            'bynder_metaproperty_collection' => $collection_data_value
         ];
+
         $jsonData = '{}';
         $fields = json_encode($fields);
-        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'bynder-skudetails');
+        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'bynder-skudetails-new');
         $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
         $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
         $this->_curl->setOption(CURLOPT_ENCODING, '');
@@ -512,11 +635,11 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
-        $this->_curl->post(self::API_CALLED . 'bynder-skudetails', $jsonData);
-        //read response
+
+        $this->_curl->post(self::API_CALLED . 'bynder-skudetails-new', $jsonData);
+
         $response = $this->_curl->getBody();
         return $response;
     }
@@ -550,11 +673,11 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'sku-data-remove-for-magento', $jsonData);
-        //read response
+
         $response = $this->_curl->getBody();
         return $response;
     }
@@ -588,11 +711,193 @@ class Data extends AbstractHelper
         $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
         $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
-        //set curl header
+
         $this->_curl->addHeader("Content-Type", "application/json");
-        //post request with url and data
+
         $this->_curl->post(self::API_CALLED . 'added-compactview-sku-from-bynder', $jsonData);
-        //read response
+
+        $response = $this->_curl->getBody();
+        return $response;
+    }
+
+    /**
+     * Get DataRemoveForMagento
+     *
+     * @return $this
+     * @param string $product_sku_key
+     * @param string $metaProperty_Collections
+     * @param string $image
+     */
+    public function getUpdateBynderImageRoleAndAltText($product_sku_key, $metaProperty_Collections, $image)
+    {
+        $fields = [
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $this->getBynderDom(),
+            'permanent_token' => $this->getPermanenToken(),
+            'licence_token' => $this->getLicenceToken(),
+            'sku_id' => $product_sku_key,
+            'metaProperty_Collections' => $metaProperty_Collections,
+            'bynder_changes_details' => $image
+        ];
+        $jsonData = '{}';
+        $fields = json_encode($fields);
+
+        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'update-bynderImageRole-and-altText');
+        $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
+        $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
+        $this->_curl->setOption(CURLOPT_ENCODING, '');
+        $this->_curl->setOption(CURLOPT_MAXREDIRS, 10);
+        $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
+        $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
+
+        $this->_curl->addHeader("Content-Type", "application/json");
+
+        $this->_curl->post(self::API_CALLED . 'update-bynderImageRole-and-altText', $jsonData);
+
+        $response = $this->_curl->getBody();
+        return $response;
+    }
+    /**
+     * Change Bynder Assets Details
+     *
+     * @param array $bynder_auth
+     * @return $this
+     */
+    public function changeBynderAssetsDetails($bynder_auth)
+    {
+        $fields = [
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $bynder_auth['bynderDomain'],
+            'permanent_token' => $bynder_auth['token'],
+            'new_value_obj' => $bynder_auth['new_value_obj'],
+            'base_url' => $this->_storeManager->getStore()->getBaseUrl(),
+            'licence_token' => $this->getLicenceToken(),
+            'bynder_metaproperty_collection' => $bynder_auth['collection_data_value']
+        ];
+        $jsonData = '{}';
+        $fields = json_encode($fields);
+        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'sync-assets-details');
+        $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
+        $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
+        $this->_curl->setOption(CURLOPT_ENCODING, '');
+        $this->_curl->setOption(CURLOPT_MAXREDIRS, 10);
+        $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
+        $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
+
+        $this->_curl->addHeader("Content-Type", "application/json");
+
+        $this->_curl->post(self::API_CALLED . 'sync-assets-details', $jsonData);
+
+        $response = $this->_curl->getBody();
+        return $response;
+    }
+    /**
+     * Change Popup Bynder Assets Details
+     *
+     * @param array $bynder_auth
+     * @return $this
+     */
+    public function changePopupBynderAssetsDetails($bynder_auth)
+    {
+        $getBaseUrl = $this->_storeManager->getStore()->getBaseUrl();
+        $fields = [
+            'domain_name' => $getBaseUrl,
+            'bynder_domain' => $bynder_auth['bynderDomain'],
+            'permanent_token' => $bynder_auth['token'],
+            'new_value_obj' => $bynder_auth['new_value_obj'],
+            'base_url' => $getBaseUrl,
+            'licence_token' => $this->getLicenceToken(),
+            'bynder_metaproperty_collection' => $bynder_auth['collection_data_value']
+        ];
+        $jsonData = '{}';
+        $fields = json_encode($fields);
+        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'sync-popup-assets-details');
+        $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
+        $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
+        $this->_curl->setOption(CURLOPT_ENCODING, '');
+        $this->_curl->setOption(CURLOPT_MAXREDIRS, 10);
+        $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
+        $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
+
+        $this->_curl->addHeader("Content-Type", "application/json");
+
+        $this->_curl->post(self::API_CALLED . 'sync-popup-assets-details', $jsonData);
+
+        $response = $this->_curl->getBody();
+       
+        return $response;
+    }
+    /**
+     * Remove Role DAM
+     *
+     * @param array $bynder_auth
+     * @return $this
+     */
+    public function removeSkuOrRoleDAM($bynder_auth)
+    {
+        $getBaseUrl = $this->_storeManager->getStore()->getBaseUrl();
+        $fields = [
+            'domain_name' => $getBaseUrl,
+            'bynder_domain' => $bynder_auth['bynderDomain'],
+            'permanent_token' => $bynder_auth['token'],
+            'new_value_obj' => $bynder_auth['changes_details'],
+            'base_url' => $getBaseUrl,
+            'licence_token' => $this->getLicenceToken(),
+            'bynder_metaproperty_collection' => $bynder_auth['collection_data_value']
+        ];
+        $jsonData = '{}';
+        $fields = json_encode($fields);
+        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'remove-sku-role-from-dam');
+        $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
+        $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
+        $this->_curl->setOption(CURLOPT_ENCODING, '');
+        $this->_curl->setOption(CURLOPT_MAXREDIRS, 10);
+        $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
+        $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
+
+        $this->_curl->addHeader("Content-Type", "application/json");
+
+        $this->_curl->post(self::API_CALLED . 'remove-sku-role-from-dam', $jsonData);
+
+        $response = $this->_curl->getBody();
+        return $response;
+    }
+    /**
+     * Remove Role DAM
+     *
+     * @param array $bynder_auth
+     * @return $this
+     */
+    public function getCheckBynderSideDeleteData($bynder_auth)
+    {
+        $getBaseUrl = $this->_storeManager->getStore()->getBaseUrl();
+        $fields = [
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $this->getBynderDom(),
+            'permanent_token' => $this->getPermanenToken(),
+            'licence_token' => $this->getLicenceToken(),
+            'base_url' => $getBaseUrl,
+            'last_cron_time' => $bynder_auth['last_cron_time']
+        ];
+        $jsonData = '{}';
+        $fields = json_encode($fields);
+        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'remove-assets-deleted-data-from-dam');
+        $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
+        $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
+        $this->_curl->setOption(CURLOPT_ENCODING, '');
+        $this->_curl->setOption(CURLOPT_MAXREDIRS, 10);
+        $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
+        $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
+
+        $this->_curl->addHeader("Content-Type", "application/json");
+
+        $this->_curl->post(self::API_CALLED . 'remove-assets-deleted-data-from-dam', $jsonData);
+
         $response = $this->_curl->getBody();
         return $response;
     }

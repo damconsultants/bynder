@@ -14,6 +14,18 @@ class GetSyncButton extends Field
      * @var string
      */
     protected $_template = 'DamConsultants_Bynder::system/config/getsyncbutton.phtml';
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $_storeManager;
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $HelperBackend;
 
     /**
      * Get Sync Button

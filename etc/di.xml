@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!--<type name="Magento\Config\Model\Config">
-        <plugin name="admin_system_config_save_plugin" type="DamConsultants\Bynder\Plugin\ConfigPlugin" sortOrder="1"/>
-    </type>-->
-    <!-- <preference for="Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Gallery\Content" type="DamConsultants\Bynder\Block\Adminhtml\Product\Helper\Form\Gallery\Content" /> -->
+	<preference for="DamConsultants\Bynder\Api\BynderMetapropertyInterface" type="DamConsultants\Bynder\Model\BynderMetaproperty" />
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
                 <item name="bynder_index_listing_data_source" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\Collection</item>
+                <item name="bynder_index_sync_data_source" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\BynderConfigSyncDataCollection</item>
+                <item name="bynder_index_replace_data_source" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\BynderConfigSyncDataCollection</item>
+				<item name="bynder_index_delete_data_source" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\BynderDeleteDataCollection</item>
             </argument>
         </arguments>
     </type>
@@ -15,6 +15,24 @@
         <arguments>
             <argument name="mainTable" xsi:type="string">bynder_data_product</argument>
             <argument name="resourceModel" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\Bynder</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\BynderConfigSyncDataCollection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">bynder_config_sync_data</argument>
+            <argument name="resourceModel" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\BynderConfigSyncData</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\BynderAutoReplaceDataCollection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">bynder_cron_replace_data</argument>
+            <argument name="resourceModel" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\BynderAutoReplaceData</argument>
+        </arguments>
+    </virtualType>
+	<virtualType name="DamConsultants\Bynder\Model\ResourceModel\Collection\Grid\BynderDeleteDataCollection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">bynder_delete_data</argument>
+            <argument name="resourceModel" xsi:type="string">DamConsultants\Bynder\Model\ResourceModel\BynderDeleteData</argument>
         </arguments>
     </virtualType>
 </config>

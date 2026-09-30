@@ -14,37 +14,35 @@
 namespace DamConsultants\Bynder\Controller\Index;
 
 use DamConsultants\Bynder\Helper\Data;
+use DamConsultants\Bynder\Model\ResourceModel\Collection\MetaPropertyCollectionFactory;
 
 class Index extends \Magento\Framework\App\Action\Action
 {
-
     /**
-     * @var $bynderDomain
+     * @var $b_datahelper
      */
-    public $bynderDomain = "";
-
+    protected $b_datahelper;
     /**
-     * @var $permanent_token
+     * @var $metaPropertyCollectionFactory
      */
-    public $permanent_token = "";
-
-    /**
-     * @var $by_redirecturl
-     */
-    public $by_redirecturl;
+    protected $metaPropertyCollectionFactory;
 
     /**
      * Index
      * @param \Magento\Framework\App\Action\Context $context
+     * @param MetaPropertyCollectionFactory $metaPropertyCollectionFactory
      * @param Data $bynderData
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
+        MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
         Data $bynderData
     ) {
         $this->b_datahelper = $bynderData;
+        $this->metaPropertyCollectionFactory = $metaPropertyCollectionFactory;
         return parent::__construct($context);
     }
+
     /**
      * Execute
      *
@@ -52,12 +50,6 @@ class Index extends \Magento\Framework\App\Action\Action
      */
     public function execute()
     {
-        $res_array = [
-            "status" => 0,
-            "data" => 0,
-            "message" => "something went wrong please try again. |
-            please logout and login again"
-        ];
         $databaseId = $this->getRequest()->getPost("databaseId");
         $datasetType = $this->getRequest()->getPost("datasetType");
         $bdomain = $this->getRequest()->getPost("bdomain");
@@ -71,35 +63,7 @@ class Index extends \Magento\Framework\App\Action\Action
                 $bdomain = (string) $bdomain;
                 $bynder_auth = $this->loadcredential();
                 if ($bynder_auth == 1) {
-                    $bdomain_chk_cookies = str_replace("https://", "", $bdomain);
-                    $bdomain_chk_config = str_replace(
-                        "https://",
-                        "",
-                        $this->b_datahelper->getBynderDom()
-                    );
-                    if ($bdomain_chk_cookies == $bdomain_chk_config) {
-                        $bynder_auth = [
-                            "bynderDomain" => $bdomain_chk_config,
-                            "redirectUri" => $this->b_datahelper->getRedirecturl(),
-                            "token" => $this->b_datahelper->getPermanenToken(),
-                            "og_media_ids" => $og_media_ids,
-                            "dataset_types" => $dataset_types
-                        ];
-                        $api_response = $this->b_datahelper->getDerivativesImage($bynder_auth);
-                        $api_response = json_decode($api_response, true);
-                           
-                        if (isset($api_response["status"]) && $api_response["status"] == 1) {
-                            $res_array["status"] = $api_response["status"];
-                            $res_array["data"] = $api_response["data"];
-                            $res_array["message"] = $api_response["message"];
-                            $res_array["bynder_auth"] = $bynder_auth;
-                        } else {
-                            $res_array["data"] = $api_response;
-                            $res_array["message"] = $api_response["message"];
-                        }
-                    } else {
-                        $res_array["message"]="Please Check Your Entered Bynder Domain | Please Check Your Credentials";
-                    }
+                    $res_array = $this->fetchDerivatives($bdomain, $og_media_ids, $dataset_types);
                 } else {
                     $res_array["message"] = $bynder_auth;
                 }
@@ -109,9 +73,89 @@ class Index extends \Magento\Framework\App\Action\Action
                     ]="Please check your credentials | session has expired. please logout and login again";
             }
         }
+
         $json_data = json_encode($res_array);
         return $this->getResponse()->setBody($json_data);
     }
+
+    /**
+     * Check the Bynder domain and request the derivatives for the selected assets
+     *
+     * @param string $bdomain
+     * @param mixed $og_media_ids
+     * @param mixed $dataset_types
+     * @return array
+     */
+    private function fetchDerivatives($bdomain, $og_media_ids, $dataset_types)
+    {
+        $res_array = [];
+        $bdomain_chk_cookies = str_replace("https://", "", $bdomain);
+        $bdomain_chk_config = str_replace(
+            "https://",
+            "",
+            $this->b_datahelper->getBynderDom()
+        );
+        $collection_data_value = $this->getCollectionDataValue();
+        if ($bdomain_chk_cookies != $bdomain_chk_config) {
+            $res_array["message"]="Please Check Your Entered Bynder Domain | Please Check Your Credentials";
+            return $res_array;
+        }
+
+        $bynder_auth = [
+            "bynderDomain" => $bdomain_chk_config,
+            "redirectUri" => $this->b_datahelper->getRedirecturl(),
+            "token" => $this->b_datahelper->getPermanenToken(),
+            "og_media_ids" => $og_media_ids,
+            "dataset_types" => $dataset_types,
+            "collection_data_value" => $collection_data_value
+        ];
+        $api_response = $this->b_datahelper->getDerivativesImage($bynder_auth);
+        $api_response = json_decode($api_response, true);
+
+        if (!is_array($api_response)) {
+            $res_array["message"] = "Invalid API response received";
+            $res_array["data"] = $api_response;
+            return $res_array;
+        }
+
+        if (isset($api_response["status"]) && $api_response["status"] == 1) {
+            $res_array["status"] = $api_response["status"];
+            $res_array["data"] = $api_response["data"] ?? [];
+            $res_array["message"] = $api_response["message"] ?? "Success";
+            $res_array["bynder_auth"] = $bynder_auth;
+        } else {
+            $res_array["data"] = $api_response;
+            $res_array["message"] = $api_response["message"] ?? "Unknown API error";
+        }
+        return $res_array;
+    }
+
+    /**
+     * Build the configured metaproperty list sent to the Bynder API
+     *
+     * @return array
+     */
+    private function getCollectionDataValue()
+    {
+        $collection_data_value = [];
+        $collection = $this->metaPropertyCollectionFactory->create()->getData();
+        if (count($collection) >= 1) {
+            foreach ($collection as $collection_value) {
+                $collection_data_value[] = [
+                    'id' => $collection_value['id'],
+                    'property_name' => $collection_value['property_name'],
+                    'property_id' => $collection_value['property_id'],
+                    'magento_attribute' => $collection_value['magento_attribute'],
+                    'attribute_id' => $collection_value['attribute_id'],
+                    'bynder_property_slug' => $collection_value['bynder_property_slug'],
+                    'system_slug' => $collection_value['system_slug'],
+                    'system_name' => $collection_value['system_name']
+                ];
+            }
+        }
+        return $collection_data_value;
+    }
+
     /**
      * Useing Helper
      *

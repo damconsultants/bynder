@@ -6,7 +6,7 @@
     }
 </style>
 <div id="popup-mpdal" style="display:none;">
-    <iframe src="https://trello.thedamconsultants.com/bynder-registration" title="Iframe Example" class="iframe"></iframe>
+    <iframe src="<?= $escaper->escapeUrl($block->getIframeurl()) ?>" title="Iframe Example" class="iframe"></iframe>
 </div>
 
 <div id="bynder-module-messages" class="bynder-module-messages" style="display: none">
@@ -37,16 +37,19 @@
                     }
                 }]
             };
-            var ajaxUrl = '<?=
-                            /** @noEscape */
-                            $block->getData('mp_active_url') ?>';
+            var ajaxUrl = '<?= $escaper->escapeUrl($block->getAjaxUrl()); ?>';
             var fieldKey = $('#bynderconfig_bynder_credential_licenses_key');
             var popup = modal(options, $('#popup-mpdal'));
-            window.mageplazaModuleActive = function() {
+            $('#bt_id').click(function() {
+                var formKey = FORM_KEY;
                 jQuery.ajax({
                     url: ajaxUrl,
                     /* dataType: 'json',*/
                     showLoader: true,
+                    type: 'POST',
+                    data: {
+                        form_key: formKey // Include the form key
+                    },
                     success: function(result) {
                         var response = JSON.parse(result);
                         if (response.status == 1) {
@@ -57,7 +60,7 @@
                     }
                 });
 
-            };
+            });
 
         }
     );

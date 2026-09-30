@@ -29,7 +29,7 @@ class Grid extends \Magento\Backend\App\Action
     public function execute()
     {
         $resultPage = $this->resultPageFactory->create();
-        $resultPage->getConfig()->getTitle()->prepend((__('Bynder Sync. Action Log')));
+        $resultPage->getConfig()->getTitle()->prepend((__('Bynder Cron Sync. Log')));
 
         return $resultPage;
     }

@@ -1,4 +1,4 @@
-<?php echo $block->getButtonHtml(); ?>
+<?= $block->getButtonHtml(); ?>
 <script>
     require([
         'jquery',
@@ -10,7 +10,7 @@
             var params = {
                 product_sku_1: product_sku_1
             };
-            new Ajax.Request('<?php echo $block->getAjaxUrl() ?>', {
+            new Ajax.Request('<?= /* @noEscape */ $block->getAjaxUrl() ?>', {
                 parameters: params,
                 loaderArea: true,
                 asynchronous: true,
@@ -23,8 +23,7 @@
                         resultText = transport.responseJSON.message;
                         $(".success-msg").show();
                         $(".success-msg").html(resultText);
-                        setTimeout(function() { // wait for 5 secs(2)
-                            //location.reload(); // then reload the page.(3)
+                        setTimeout(function() {
                             $('.success-msg').delay(5000).fadeOut('slow');
                         }, 5000);
                     } else {
@@ -32,12 +31,11 @@
                         resultText = transport.responseJSON.message
                         $(".error-msg").show();
                         $(".error-msg").html(resultText);
-                        setTimeout(function() { // wait for 5 secs(2)
-                            //location.reload(); // then reload the page.(3)
+                        setTimeout(function() {
                             $('.error-msg').delay(5000).fadeOut('slow');
                         }, 5000);
                     }
-                   // $('#byndersyncdatawithout_bynder_sync_data_without_select_sku_1').text(resultText);
+                   
 
                 }
             });

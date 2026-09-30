@@ -54,7 +54,11 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
     /**
      * @var \Magento\Framework\App\Request\Http
      */
-    public $request;
+    public $_request;
+    /**
+     * @var _registry
+     */
+    protected $_registry;
 
     /**
      * Gallery
@@ -74,9 +78,9 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
         ArrayUtils $arrayUtils,
         \Magento\Framework\Json\EncoderInterface $jsonEncoder,
         \Magento\Framework\Registry $Registry,
-        ImagesConfigFactoryInterface $imagesConfigFactory = null,
+        ?ImagesConfigFactoryInterface $imagesConfigFactory = null,
         array $galleryImagesConfig = [],
-        UrlBuilder $urlBuilder = null,
+        ?UrlBuilder $urlBuilder = null,
         array $data = []
     ) {
         parent::__construct(
@@ -148,131 +152,124 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
      *
      * @return string
      */
-    
     public function getGalleryImagesJson()
     {
         $product = $this->_registry->registry('product');
 
         $use_bynder_cdn = $product->getData('use_bynder_cdn');
         $use_bynder_both_image = $product->getData('use_bynder_both_image');
+        $imagesItems = [];
         if ($use_bynder_both_image == 1) { /*Both Image*/
-            
             if (!empty($product->getData('bynder_multi_img'))) {
-                $bynder_image = $product->getData('bynder_multi_img');
-                $json_value = json_decode($bynder_image, true);
-                
-                $role_image = 0;
-                foreach ($json_value as $key => $values) {
-                    $image_values =  trim($values['thum_url']);
-                    foreach ($values['image_role'] as $image_role) {
-                        if ($image_role ==  'image') {
-                            $role_image = 1;
-                        }
-                    }
-                    $imageItem = new DataObject([
-                        'thumb' => $image_values,
-                        'img' => $image_values,
-                        'full' => $image_values,
-                        'caption' => $this->getProduct()->getName(),
-                        'position' => $key + 1,
-                        'isMain' =>$role_image,
-                        'type' => ($values['item_type'] == 'IMAGE') ? 'image' : 'video',
-                        'videoUrl' => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
-                        "src" => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
-                        "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : null
-                    ]);
-                    $imagesItems[] = $imageItem->toArray();
-                }
+                [$imagesItems, $role_image] = $this->getBynderGalleryItems($product, 'image', false);
             }
             foreach ($this->getGalleryImages() as $image) {
-                $imageItem = new DataObject([
-                    'thumb' => $image->getData('small_image_url'),
-                    'img' => $image->getData('medium_image_url'),
-                    'full' => $image->getData('large_image_url'),
-                    'caption' => ($role_image == 1) ? 0 :($image->getLabel() ?: $this->getProduct()->getName()),
-                    'position' => $image->getData('position'),
-                    'isMain' => $this->isMainImage($image),
-                    'type' => str_replace('external-', '', $image->getMediaType()),
-                    'videoUrl' => $image->getVideoUrl(),
-                ]);
-                foreach ($this->getGalleryImagesConfig()->getItems() as $imageConfig) {
-                    $imageItem->setData(
-                        $imageConfig->getData('json_object_key'),
-                        $image->getData($imageConfig->getData('data_object_key'))
-                    );
-                }
-                $imagesItems[] = $imageItem->toArray();
+                $caption = ($role_image == 1) ? 0 : ($image->getLabel() ?: $this->getProduct()->getName());
+                $imagesItems[] = $this->buildGalleryItem($image, $caption);
             }
         } elseif ($use_bynder_cdn == 1) { /*CDN Image*/
             if (!empty($product->getData('bynder_multi_img'))) {
-                $bynder_image = $product->getData('bynder_multi_img');
-                $json_value = json_decode($bynder_image, true);
-                $role_image = 0;
-                foreach ($json_value as $key => $values) {
-                    $image_values =  trim($values['thum_url']);
-                    foreach ($values['image_role'] as $image_role) {
-                        if ($image_role ==  'image') {
-                            $role_image = 1;
-                        }
-                    }
-                    $imageItem = new DataObject([
-                        'thumb' => $image_values,
-                        'img' => $image_values,
-                        'full' => $image_values,
-                        'caption' => $this->getProduct()->getName(),
-                        'position' => $key + 1,
-                        'isMain' =>$role_image,
-                        'type' => ($values['item_type'] == 'IMAGE') ? 'image' : 'video',
-                        'videoUrl' => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
-                        "src" => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
-                        "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : null
-                    ]);
-                    $imagesItems[] = $imageItem->toArray();
-                }
+                [$imagesItems, $role_image] = $this->getBynderGalleryItems($product, 'Base', true);
             } else {
                 /* CDN link empty */
-                foreach ($this->getGalleryImages() as $image) {
-                    $imageItem = new DataObject([
-                        'thumb' => $image->getData('small_image_url'),
-                        'img' => $image->getData('medium_image_url'),
-                        'full' => $image->getData('large_image_url'),
-                        'caption' => ($image->getLabel() ?: $this->getProduct()->getName()),
-                        'position' => $image->getData('position'),
-                        'isMain' => $this->isMainImage($image),
-                        'type' => str_replace('external-', '', $image->getMediaType()),
-                        'videoUrl' => $image->getVideoUrl(),
-                    ]);
-                    foreach ($this->getGalleryImagesConfig()->getItems() as $imageConfig) {
-                        $imageItem->setData(
-                            $imageConfig->getData('json_object_key'),
-                            $image->getData($imageConfig->getData('data_object_key'))
-                        );
-                    }
-                    $imagesItems[] = $imageItem->toArray();
-                }
+                $imagesItems = $this->getDefaultGalleryItems();
             }
         } else {
-            foreach ($this->getGalleryImages() as $image) {
-                $imageItem = new DataObject([
-                    'thumb' => $image->getData('small_image_url'),
-                    'img' => $image->getData('medium_image_url'),
-                    'full' => $image->getData('large_image_url'),
-                    'caption' => ($image->getLabel() ?: $this->getProduct()->getName()),
-                    'position' => $image->getData('position'),
-                    'isMain' => $this->isMainImage($image),
-                    'type' => str_replace('external-', '', $image->getMediaType()),
-                    'videoUrl' => $image->getVideoUrl(),
-                ]);
-                foreach ($this->getGalleryImagesConfig()->getItems() as $imageConfig) {
-                    $imageItem->setData(
-                        $imageConfig->getData('json_object_key'),
-                        $image->getData($imageConfig->getData('data_object_key'))
-                    );
-                }
-                $imagesItems[] = $imageItem->toArray();
-            }
+            $imagesItems = $this->getDefaultGalleryItems();
         }
         return json_encode($imagesItems);
+    }
+
+    /**
+     * Build gallery items from the product's Bynder media (sorted by is_order)
+     *
+     * Once an image with $mainRoleName is found, isMain stays 1 for the remaining items (existing behaviour).
+     *
+     * @param Product $product
+     * @param string $mainRoleName role that marks an image as main ('image' or 'Base')
+     * @param bool $positionFromOrder use is_order as position instead of index + 1
+     * @return array [items, role_image]
+     */
+    private function getBynderGalleryItems($product, $mainRoleName, $positionFromOrder)
+    {
+        $imagesItems = [];
+        $bynder_image = $product->getData('bynder_multi_img');
+        $json_value = json_decode($bynder_image, true);
+        if (is_array($json_value) && !empty($json_value)) {
+            usort($json_value, function ($a, $b) {
+                return $a['is_order'] <=> $b['is_order'];
+            });
+        } else {
+            $json_value = [];
+        }
+        $role_image = 0;
+        foreach ($json_value as $key => $values) {
+            $image_values =  trim($values['thum_url']);
+            if ($values['item_type'] == 'IMAGE' && isset($values['image_role'])) {
+                foreach ($values['image_role'] as $image_role) {
+                    if ($image_role == $mainRoleName) {
+                        $role_image = 1;
+                    }
+                }
+            }
+            $imageItem = new DataObject([
+                'thumb' => $image_values,
+                'img' => $image_values,
+                'full' => $image_values,
+                'caption' => $this->getProduct()->getName(),
+                'position' => $positionFromOrder ? $values['is_order'] : $key + 1,
+                'isMain' => $role_image,
+                'type' => ($values['item_type'] == 'IMAGE') ? 'image' : 'video',
+                'videoUrl' => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
+                "src" => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
+                "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : 'image'
+            ]);
+            $imagesItems[] = $imageItem->toArray();
+        }
+        return [$imagesItems, $role_image];
+    }
+
+    /**
+     * Build items from the standard Magento media gallery
+     *
+     * @return array
+     */
+    private function getDefaultGalleryItems()
+    {
+        $imagesItems = [];
+        foreach ($this->getGalleryImages() as $image) {
+            $caption = ($image->getLabel() ?: $this->getProduct()->getName());
+            $imagesItems[] = $this->buildGalleryItem($image, $caption);
+        }
+        return $imagesItems;
+    }
+
+    /**
+     * Build one item from a Magento gallery image
+     *
+     * @param DataObject $image
+     * @param mixed $caption
+     * @return array
+     */
+    private function buildGalleryItem($image, $caption)
+    {
+        $imageItem = new DataObject([
+            'thumb' => $image->getData('small_image_url'),
+            'img' => $image->getData('medium_image_url'),
+            'full' => $image->getData('large_image_url'),
+            'caption' => $caption,
+            'position' => $image->getData('position'),
+            'isMain' => $this->isMainImage($image),
+            'type' => str_replace('external-', '', $image->getMediaType()),
+            'videoUrl' => $image->getVideoUrl(),
+        ]);
+        foreach ($this->getGalleryImagesConfig()->getItems() as $imageConfig) {
+            $imageItem->setData(
+                $imageConfig->getData('json_object_key'),
+                $image->getData($imageConfig->getData('data_object_key'))
+            );
+        }
+        return $imageItem->toArray();
     }
 
     /**

@@ -1,79 +1,140 @@
 <?php
-$get_metaData = $block->getMetaData()['metadata'];
-$selected_property_name = $block->getMetaData()['property_name'];
+$block_get_data = $block->getMetaData();
+$get_metaData = $block_get_data['metadata'];
+$default_sku_value = isset($block_get_data['sku_selected']) ? $block_get_data['sku_selected'] : '0';
+$default_image_role_value = isset($block_get_data['image_role_selected'])
+    ? $block_get_data['image_role_selected']
+    : '0';
+$default_image_alt_text = isset($block_get_data['image_alt_text']) ? $block_get_data['image_alt_text'] : '0';
+$url = $block->getMainUrl();
+$syncMetaUrl = $escaper->escapeUrl($block->getSynmetaProperty());
 
+$sku_properites = "";
+$image_role_properites = "";
+$alt_properites = "";
+if (count($get_metaData) > 0) {
+    foreach ($get_metaData as $newKey => $newValue) {
+        $sku_checked = "";
+        $image_role_checked = "";
+        $alt_checked = "";
+        if ($default_sku_value == $newKey) {
+            $sku_checked = "selected";
+        } elseif ($default_image_role_value == $newKey) {
+            $image_role_checked = "selected";
+        } elseif ($default_image_alt_text == $newKey) {
+            $alt_checked = "selected";
+        }
+        $sku_properites .= '<option value="' . $newKey . '" ' . $sku_checked . ' >' .
+                        $escaper->escapeHtml($newValue) .
+                        '</option>';
+        $image_role_properites .= '<option value="' . $newKey . '" ' . $image_role_checked . ' >' .
+                        $escaper->escapeHtml($newValue) .
+                        '</option>';
+        $alt_properites .= '<option value="' . $newKey . '" ' . $alt_checked . ' >' .
+                            $newValue .
+                            '</option>';
+    }
+}
 ?>
-
-<form name="metaproperty" 
-    action="<?= $block->escapeUrl($block->getSubmitUrl()); ?>" 
-    method="post" enctype="multipart/form-data">
+<button type="submit" class="action- scalable primary syncMetaProperties" 
+        name="submit" id="btn_submit sync-metaproperties" 
+        style="margin-top: 30px; border-radius: 4px; width: 247px;  margin-left: auto; display: block;">
+    <span>
+        <?= $escaper->escapeHtml('Sync Metaproperties');?>
+    </span>
+</button>
+<form name="metaproperty" action="<?= $escaper->escapeUrl($block->getSubmitUrl()); ?>" method="post"
+    enctype="multipart/form-data">
     <?= $block->getBlockHtml('formkey');
     ?>
     <div class="main_container dear-stock-sec">
         <div class="main_header_master admin__data-grid-wrap">
             <div class="main_container_masterdata admin__data-grid-wrap product-imp-sec">
-                <label> <strong>Image Configration:-</strong> </label> <br><br>
-                <div class="form-check form-check-inline" style="float: left;width: 100%;">
-
-                    <?php
-                    if (count($get_metaData) === 0) { ?>
-                        <label class="form-check-label">
-                            <p>Bynder property not getting.</p>
-                            <?php } else {
-
-                        foreach ($get_metaData as $v) {
-                            $checked = "";
-                            if ($selected_property_name == $v["name"]) {
-                                $checked = "checked";
-                            }
-                            ?>
-                                <label class="form-check-label">
-                                    <input type="radio" name="select_meta_tag" 
-                                        class="form-check-input meta_tag_options" 
-                                        value="<?= $block->escapeHtml($v['name']); ?>" 
-                                        <?= $block->escapeHtml($checked); ?> /> 
-                                        <?= $block->escapeHtml($v["label"]); ?>
-                                </label>
-                                </br>
-                            <?php
-                        }
-                            }
-                            ?>
-                        <button type="submit" class="action- scalable primary" 
-                            name="submit" id="btn_submit">
-                            <span>
-                                <?= $block->escapeHtml('Save Property'); ?>
-                            </span>
-                        </button>
+                <!-- SKU -->
+                <div style="margin-bottom: 20px;">
+                    <label><strong>The Meta Property Configuration For the SKU:-</strong></label>
+                    <div style="margin-top: 10px;">
+                        <input type="hidden" name="system_slug[]" value="sku">
+                        <label><strong>Property List:-</strong></label>
+                        <br><br>
+                        <select class="selectbox_item" id="bynder_property" name="select_meta_tag[]">
+                            <option value="0">Select The option</option>
+                            <?= /* @noEscape */ $sku_properites; ?>
+                        </select>
+                    </div>
                 </div>
+
+                <hr>
+
+                <!-- IMAGE ROLE -->
+                <div style="margin-bottom: 20px;">
+                    <label><strong>The Meta Property Configuration For the Image Role :-</strong></label>
+                    <div style="margin-top: 10px;">
+                        <input type="hidden" name="system_slug[]" value="image_role">
+                        <label><strong>Property List:-</strong></label>
+                        <br><br>
+                        <select class="selectbox_item" id="bynder_property_image_role" name="select_meta_tag[]">
+                            <option value="0">Select The option</option>
+                            <?= /* @noEscape */ $image_role_properites; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- ALT TEXT -->
+                <div style="margin-bottom: 20px;">
+                    <label><strong>The Meta Property Configuration For the Alt Text :-</strong></label>
+                    <div style="margin-top: 10px;">
+                        <input type="hidden" name="system_slug[]" value="alt_text">
+                        <label><strong>Property List:-</strong></label>
+                        <br><br>
+                        <select class="selectbox_item" id="bynder_property_alt_tax" name="select_meta_tag[]">
+                            <option value="0">Select The option</option>
+                            <?= /* @noEscape */ $alt_properites; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SAVE BUTTON -->
+                <div style="text-align: right; margin-top: 30px;">
+                    <button type="submit"
+                            class="action- scalable primary"
+                            name="submit"
+                            id="btn_submit"
+                            style="border-radius: 4px; width: 247px;">
+                        <span>
+                            <?= $escaper->escapeHtml('Save Metaproperties'); ?>
+                        </span>
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
 </form>
+<script>
+    require(["jquery"],function($) {
+        $(document).ready(function() {
+            $('.syncMetaProperties').click(function () {
+                var formKey = FORM_KEY;
+                var customurl = '<?= $escaper->escapeHtml($syncMetaUrl); ?>';
+                    $.ajax({
+                        url: customurl,
+                        type: 'POST',
+                        data: {
+                            form_key: formKey // Include the form key
+                        },
+                        showLoader: true,
+                        async: true,
+                        loaderArea: true,
+                        timeout: 300000,
+                    complete: function(response) { 
+                        location.reload(true);
+                    }
+                });
+            });
+       });
+    });
+</script>
 
-<style type="text/css">
-    .product-imp-sec {
-        max-width: 100%;
-        border: 1px solid #777777;
-        padding: 24px;
-        border-radius: 0px;
-    }
-
-    .dear-stock-sec .actions-split:hover,
-    .product-imp-sec button.primary {
-        box-shadow: none;
-        margin-left: auto;
-        display: block;
-        margin-top: 10px;
-    }
-
-    .main_header_master .main_container_masterdata .form-check {
-        display: flex;
-        flex-wrap: wrap;
-    }
-
-    .main_header_master .main_container_masterdata .form-check .form-check-label {
-        width: calc(25% - 10px);
-        margin: 5px;
-    }
-</style>

@@ -1,16 +1,16 @@
 
 <input type="hidden"
-    name="<?= $block->escapeHtml($block->getNPrefix()) ?>"
+    name="<?= $escaper->escapeHtml($block->getNPrefix()) ?>"
     value="" /><!-- this is send if nothing is checked -->
 <ul class="checkboxes">
     <?php foreach ($block->getValues() as $name => $label): ?>
         <li>
-            <input type="checkbox" value="<?= $block->escapeHtml($name) ?>"
-                name="<?= $block->escapeHtml($block->getNPrefix()) ?>[]"
-                id="<?= $block->escapeHtml($block->getId() . '_' . $name) ?>"
-                <?= ($block->escapeHtml($block->getCheck($name)) ? ' checked="checked"' : '') ?> />
-            <label for="<?=$block->escapeHtml($block->getId() . '_' . $name) ?>">
-                <?=  $block->escapeHtml($label) ?>
+            <input type="checkbox" value="<?= $escaper->escapeHtml($name) ?>"
+                name="<?= $escaper->escapeHtml($block->getNPrefix()) ?>[]"
+                id="<?= $escaper->escapeHtml($block->getId() . '_' . $name) ?>"
+                <?= ($escaper->escapeHtml($block->getCheck($name)) ? ' checked="checked"' : '') ?> />
+            <label for="<?=$escaper->escapeHtml($block->getId() . '_' . $name) ?>">
+                <?=  $escaper->escapeHtml($label) ?>
             </label>
         </li>
     <?php endforeach; ?>

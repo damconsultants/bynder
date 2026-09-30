@@ -5,6 +5,14 @@ namespace DamConsultants\Bynder\Model\Config\Source;
 class Radio implements \Magento\Framework\Data\OptionSourceInterface
 {
     /**
+     * @var $bulk
+     */
+    protected $bulk;
+    /**
+     * @var $_options
+     */
+    protected $_options;
+    /**
      * Radio
      * @param \Magento\ConfigurableProduct\Block\Adminhtml\Product\Steps\Bulk $bulk
      */
@@ -27,7 +35,7 @@ class Radio implements \Magento\Framework\Data\OptionSourceInterface
         foreach ($collection as $attribute) {
                 $this->_options[] = [
                     'label' => __($attribute->getFrontendLabel()),
-                    'value' => $attribute->getAttributeCode()
+                    'value' => $attribute->getFrontendLabel()
                 ];
         }
         return $this->_options;

@@ -15,22 +15,43 @@ class Button extends Field
      * @var string
      */
     protected $_template = 'DamConsultants_Bynder::system/config/button.phtml';
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $_storeManager;
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $HelperBackend;
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $_datahelper;
 
     /**
      * Button
      * @param Context $context
      * @param StoreManagerInterface $storeManager
      * @param \Magento\Backend\Helper\Data $HelperBackend
+     * @param \DamConsultants\Bynder\Helper\Data $datahelper
      * @param array $data
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
         \Magento\Backend\Helper\Data $HelperBackend,
+        \DamConsultants\Bynder\Helper\Data $datahelper,
         array $data = []
     ) {
         $this->_storeManager = $storeManager;
         $this->HelperBackend = $HelperBackend;
+        $this->_datahelper = $datahelper;
         parent::__construct($context, $data);
     }
 
@@ -54,18 +75,17 @@ class Button extends Field
      */
     protected function _getElementHtml(AbstractElement $element)
     {
-        $originalData = $element->getOriginalData();
-        $path = explode('/', $originalData['path']);
-        $url = $this->_storeManager->getStore()->getBaseUrl();
-        $this->addData(
-            [
-                'mp_active_url'      => $url . 'bynder/index/activate',
-                'mp_module_html_id'  => implode('_', $path)
-            ]
-        );
         return $this->_toHtml();
     }
-
+    /**
+     * Return ajax url for custom button
+     *
+     * @return string
+     */
+    public function getAjaxUrl()
+    {
+        return $this->getUrl('bynder/index/activates');
+    }
     /**
      * Get Custom Url
      *
@@ -74,6 +94,16 @@ class Button extends Field
     public function getCustomUrl()
     {
         return $this->getUrl();
+    }
+
+    /**
+     * Get Iframe Url
+     *
+     * @return string
+     */
+    public function getIframeurl()
+    {
+        return $this->_datahelper->getIframeUrl();
     }
 
     /**
@@ -86,9 +116,9 @@ class Button extends Field
         $activeButton = $this->getLayout()
             ->createBlock(\Magento\Backend\Block\Widget\Button::class)
             ->setData([
-                'id'      => 'bynder_module_active',
+                'id'      => 'bt_id',
                 'label'   => __('Get License Key'),
-                'onclick' => 'javascript:mageplazaModuleActive(); return false;',
+                
             ]);
         return $activeButton->toHtml();
     }

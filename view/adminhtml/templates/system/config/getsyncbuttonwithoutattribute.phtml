@@ -8,18 +8,15 @@
             var params = {
                 product_sku_1: product_sku_1,
             };
-            new Ajax.Request('<?php echo $block->getAjaxUrl() ?>', {
+            new Ajax.Request('<?= /* @noEscape */ $block->getAjaxUrl() ?>', {
                 parameters: params,
                 loaderArea: true,
                 asynchronous: true,
                 onCreate: function() {
                     $('#byndersyncdatawithout_bynder_sync_data_without_select_sku_1').text('');
                 },
-              /*  beforeSend: function() {
-                    $('body').trigger('processStart');
-                },*/
+              
                 onSuccess: function(transport) {
-                    console.log(transport);
                     var resultText = '';
                     if (transport.status > 200) {
                         resultText = transport.statusText;
@@ -34,4 +31,4 @@
         });
     });
 </script>
-<?php echo $block->getButtonHtml(); ?>
+<?= $block->getButtonHtml(); ?>

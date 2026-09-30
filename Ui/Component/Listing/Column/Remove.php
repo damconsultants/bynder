@@ -1,12 +1,12 @@
 <?php
 /**
- * Bynder
+ * bynder
  *
  * NOTICE OF LICENSE
  *
  * This source file is subject to the ecomteck.com license that is
  * available through the world-wide-web at this URL:
- * https://Bynder.com/
+ * https://bynder .com/
  *
  * DISCLAIMER
  *
@@ -62,10 +62,10 @@ class Remove extends \Magento\Ui\Component\Listing\Columns\Column
                 
                 if ($item) {
                     if ($item['remove_for_magento'] == 0) {
-                        $type ='Remove for Magento';
+                        $type ='No data';
                     } elseif ($item['remove_for_magento'] == 1) {
 
-                        $type = 'Not Remove for Magento';
+                        $type = 'Import into magento';
                     } else {
                         $type = 'Change on Bynder';
                     }

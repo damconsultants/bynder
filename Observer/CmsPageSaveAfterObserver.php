@@ -10,7 +10,7 @@ class CmsPageSaveAfterObserver implements ObserverInterface
     /**
      * @var $helper
      */
-    protected $helper;
+    protected $_datahelper;
     /**
      * @var $cmsHelper
      */
