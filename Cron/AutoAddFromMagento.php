@@ -4,6 +4,7 @@ namespace DamConsultants\Bynder\Cron;
 
 use Exception;
 use \Psr\Log\LoggerInterface;
+use Magento\Framework\DB\Select;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Catalog\Model\Product\Action;
@@ -13,6 +14,16 @@ use DamConsultants\Bynder\Model\ResourceModel\Collection\BynderMediaTableCollect
 
 class AutoAddFromMagento
 {
+    /**
+     * Default number of SKUs per batch when the "product SKU limit" config is empty
+     */
+    private const BATCH_SIZE = 20;
+
+    /**
+     * Number of product ids per attribute-reset update
+     */
+    private const RESET_CHUNK_SIZE = 1000;
+
     /**
      * @var \Psr\Log\LoggerInterface
      */
@@ -116,6 +127,10 @@ class AutoAddFromMagento
     /**
      * Execute
      *
+     * Collects every pending SKU in Magento, then syncs them in batches of the configured
+     * product SKU limit (default BATCH_SIZE when the config is empty). When nothing is
+     * pending, bynder_auto_replace is cleared so the next run starts a new cycle.
+     *
      * @return boolean
      */
     public function execute()
@@ -125,14 +140,64 @@ class AutoAddFromMagento
         if (!$enable) {
             return false;
         }
-        $product_collection = $this->collectionFactory->create();
-        $product_sku_limit = (int)$this->datahelper->getAutoProductSkuLimitConfig();
-        if (!empty($product_sku_limit)) {
-            $product_collection->getSelect()->limit($product_sku_limit);
-        } else {
-            $product_collection->getSelect()->limit(50);
+
+        $all_skus = $this->getPendingSkus();
+        $this->logger->info("Auto replace pending SKUs => " . count($all_skus));
+
+        if (empty($all_skus)) {
+            $this->resetAutoReplaceAttribute();
+            $this->logger->info("Bynder Auto Replace Attribute Null");
+            return true;
         }
-        $product_collection->addAttributeToSelect('*')
+
+        $property_id = null;
+        $collection = $this->metaPropertyCollectionFactory->create()->getData();
+        $meta_properties = $this->getMetaPropertiesCollection($collection);
+        $collection_value = $meta_properties['collection_data_value'];
+        $collection_slug_val = $meta_properties['collection_data_slug_val'];
+
+        $batch_size = (int)$this->datahelper->getAutoProductSkuLimitConfig();
+        if ($batch_size <= 0) {
+            $batch_size = self::BATCH_SIZE;
+        }
+
+        $batches = array_chunk($all_skus, $batch_size);
+        $total_batches = count($batches);
+        foreach ($batches as $batch_index => $sku_batch) {
+            $this->logger->info("Sku => " . json_encode($sku_batch, true));
+            foreach ($sku_batch as $sku) {
+                if ($sku === null || trim((string)$sku) === "") {
+                    continue;
+                }
+                try {
+                    $this->processSku($sku, $property_id, $collection_value, $collection_slug_val);
+                } catch (\Throwable $e) {
+                    // one bad SKU must not stop the remaining batches
+                    $this->logger->error(
+                        'Bynder auto replace cron: SKU ' . $sku . ' failed: ' . $e->getMessage()
+                    );
+                }
+            }
+            // release products cached by the repository so memory stays flat across batches
+            $this->_productRepository->cleanCache();
+            $this->logger->info(
+                'Bynder auto replace cron: batch ' . ($batch_index + 1) . '/' . $total_batches
+                . ' done (' . count($sku_batch) . ' SKUs)'
+            );
+        }
+        return true;
+    }
+
+    /**
+     * Get every non-configurable SKU that has Bynder media and has not been auto-replaced yet.
+     * Only the SKU column is fetched.
+     *
+     * @return array
+     */
+    private function getPendingSkus(): array
+    {
+        $product_collection = $this->collectionFactory->create();
+        $product_collection
             ->addAttributeToFilter(
                 [
                     ['attribute' => 'bynder_multi_img', 'notnull' => true]
@@ -143,50 +208,63 @@ class AutoAddFromMagento
                     ['attribute' => 'bynder_auto_replace', 'null' => true]
                 ]
             )
-            ->addAttributeToFilter('type_id', ['neq' => "configurable"])
-            ->load();
-        $property_id = null;
-        $collection = $this->metaPropertyCollectionFactory->create()->getData();
-        $meta_properties = $this->getMetaPropertiesCollection($collection);
+            ->addAttributeToFilter('type_id', ['neq' => "configurable"]);
 
-        $collection_value = $meta_properties['collection_data_value'];
-        $collection_slug_val = $meta_properties['collection_data_slug_val'];
+        return $this->fetchColumn($product_collection, 'e.sku');
+    }
 
-        $productSku_array = [];
-        foreach ($product_collection->getData() as $product) {
-            $productSku_array[] = $product['sku'];
-        }
-        $this->logger->info("Sku => ". json_encode($productSku_array, true));
-        if (count($productSku_array) > 0) {
-            foreach ($productSku_array as $sku) {
-                if ($sku != "") {
-                    $this->processSku($sku, $property_id, $collection_value, $collection_slug_val);
-                }
-            }
-        } else {
-            $product_collection = $this->collectionFactory->create()
-            ->addAttributeToSelect('*')
+    /**
+     * Clear bynder_auto_replace on every enabled, visible product that has it set,
+     * in chunks so large catalogues don't build one huge update.
+     *
+     * @return void
+     */
+    private function resetAutoReplaceAttribute()
+    {
+        $product_collection = $this->collectionFactory->create();
+        $product_collection
             ->addAttributeToFilter('visibility', \Magento\Catalog\Model\Product\Visibility::VISIBILITY_BOTH)
             ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED)
             ->addAttributeToFilter(
                 [
                     ['attribute' => 'bynder_auto_replace', 'notnull' => true]
                 ]
-            )
-            ->load();
-            $id = [];
-            foreach ($product_collection as $product) {
-                $id[] = $product->getId();
-            }
-            $storeId = $this->storeManagerInterface->getStore()->getId();
+            );
+
+        $ids = $this->fetchColumn($product_collection, 'e.entity_id');
+        if (empty($ids)) {
+            return;
+        }
+
+        $storeId = $this->storeManagerInterface->getStore()->getId();
+        foreach (array_chunk($ids, self::RESET_CHUNK_SIZE) as $id_chunk) {
             $this->action->updateAttributes(
-                $id,
+                $id_chunk,
                 ['bynder_auto_replace' => ""],
                 $storeId
             );
         }
-        $this->logger->info("Bynder Auto Replace Attribute Null");
-        return true;
+    }
+
+    /**
+     * Fetch a single column from a filtered product collection without loading products
+     *
+     * @param \Magento\Catalog\Model\ResourceModel\Product\Collection $product_collection
+     * @param string $column
+     * @return array
+     */
+    private function fetchColumn($product_collection, $column): array
+    {
+        $select = clone $product_collection->getSelect();
+        $select->reset(Select::COLUMNS)
+            ->reset(Select::ORDER)
+            ->reset(Select::LIMIT_COUNT)
+            ->reset(Select::LIMIT_OFFSET)
+            ->columns(['value' => $column])
+            ->distinct(true)
+            ->order('e.entity_id ASC');
+
+        return $product_collection->getConnection()->fetchCol($select);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace DamConsultants\Bynder\Cron;
 
 use Exception;
 use \Psr\Log\LoggerInterface;
+use Magento\Framework\DB\Select;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Catalog\Model\Product\Action;
@@ -13,6 +14,11 @@ use DamConsultants\Bynder\Model\ResourceModel\Collection\BynderMediaTableCollect
 
 class FeatchNullDataToMagento
 {
+    /**
+     * Default number of SKUs per batch when the "product SKU limit" config is empty
+     */
+    private const BATCH_SIZE = 20;
+
     /**
      * @var \Psr\Log\LoggerInterface
      */
@@ -117,6 +123,9 @@ class FeatchNullDataToMagento
     /**
      * Execute
      *
+     * Collects every pending SKU in Magento, then syncs them in batches of the configured
+     * product SKU limit (default BATCH_SIZE when the config is empty).
+     *
      * @return boolean
      */
     public function execute()
@@ -125,14 +134,59 @@ class FeatchNullDataToMagento
         if (!$enable) {
             return false;
         }
-        $product_collection = $this->collectionFactory->create();
-        $product_sku_limit = (int)$this->datahelper->getFetchProductSkuLimitConfig();
-        if (!empty($product_sku_limit)) {
-            $product_collection->getSelect()->limit($product_sku_limit);
-        } else {
-            $product_collection->getSelect()->limit(50);
+
+        $all_skus = $this->getPendingSkus();
+        if (empty($all_skus)) {
+            return true;
         }
-        $product_collection->addAttributeToSelect(['sku', 'bynder_multi_img', 'bynder_document', 'bynder_cron_sync'])
+
+        $property_id = null;
+        $collection = $this->metaPropertyCollectionFactory->create()->getData();
+        $meta_properties = $this->getMetaPropertiesCollection($collection);
+        $collection_value = $meta_properties['collection_data_value'];
+        $collection_slug_val = $meta_properties['collection_data_slug_val'];
+
+        $batch_size = (int)$this->datahelper->getFetchProductSkuLimitConfig();
+        if ($batch_size <= 0) {
+            $batch_size = self::BATCH_SIZE;
+        }
+
+        $batches = array_chunk($all_skus, $batch_size);
+        $total_batches = count($batches);
+        foreach ($batches as $batch_index => $sku_batch) {
+            foreach ($sku_batch as $sku) {
+                if ($sku === null || trim((string)$sku) === "") {
+                    continue;
+                }
+                try {
+                    $this->processSku($sku, $property_id, $collection_value, $collection_slug_val);
+                } catch (\Throwable $e) {
+                    // one bad SKU must not stop the remaining batches
+                    $this->logger->error(
+                        'Bynder fetch cron: SKU ' . $sku . ' failed: ' . $e->getMessage()
+                    );
+                }
+            }
+            // release products cached by the repository so memory stays flat across batches
+            $this->_productRepository->cleanCache();
+            $this->logger->info(
+                'Bynder fetch cron: batch ' . ($batch_index + 1) . '/' . $total_batches
+                . ' done (' . count($sku_batch) . ' SKUs)'
+            );
+        }
+        return true;
+    }
+
+    /**
+     * Get every enabled, non-configurable SKU that still has no Bynder media or document
+     * and has not been synced by the cron yet. Only the SKU column is fetched.
+     *
+     * @return array
+     */
+    private function getPendingSkus(): array
+    {
+        $product_collection = $this->collectionFactory->create();
+        $product_collection
             ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED)
             ->addAttributeToFilter(
                 [
@@ -145,25 +199,18 @@ class FeatchNullDataToMagento
                     ['attribute' => 'bynder_cron_sync', 'null' => true]
                 ]
             )
-            ->addAttributeToFilter('type_id', ['neq' => "configurable"])
-            ->load();
-        $property_id = null;
-        $collection = $this->metaPropertyCollectionFactory->create()->getData();
-        $meta_properties = $this->getMetaPropertiesCollection($collection);
-        $collection_value = $meta_properties['collection_data_value'];
-        $collection_slug_val = $meta_properties['collection_data_slug_val'];
-        $productSku_array = [];
-        foreach ($product_collection->getData() as $product) {
-            $productSku_array[] = $product['sku'];
-        }
-        if (count($productSku_array) > 0) {
-            foreach ($productSku_array as $sku) {
-                if ($sku != "") {
-                    $this->processSku($sku, $property_id, $collection_value, $collection_slug_val);
-                }
-            }
-        }
-        return true;
+            ->addAttributeToFilter('type_id', ['neq' => "configurable"]);
+
+        $select = clone $product_collection->getSelect();
+        $select->reset(Select::COLUMNS)
+            ->reset(Select::ORDER)
+            ->reset(Select::LIMIT_COUNT)
+            ->reset(Select::LIMIT_OFFSET)
+            ->columns(['sku' => 'e.sku'])
+            ->distinct(true)
+            ->order('e.entity_id ASC');
+
+        return $product_collection->getConnection()->fetchCol($select);
     }
 
     /**
